@@ -2136,99 +2136,35 @@
   ];
   
   // Variables to track state
-  let currentQuestionIndex = 0;
-  let selectedAnswers = {};
-  let showingAnswers = false;
-  let mode = 'exam';
-  
-  // Initialize the application
-  function init() {
-    renderCurrentQuestion();
-    updateControls();
-  }
-  
-  // Render the current question
-  function renderCurrentQuestion() {
-    if (mode === 'exam') {
-      renderExamQuestion();
-    } else {
-      renderStudyMode();
+    let currentQuestionIndex = 0;
+    let selectedAnswers = {};
+    let showingAnswers = false;
+    let mode = 'exam';
+    
+    // Initialize the application
+    function init() {
+      renderCurrentQuestion();
+      updateControls();
     }
-  }
-  
-  function renderExamQuestion() {
-    const question = questions[currentQuestionIndex];
-    const questionContainer = document.getElementById('question-container');
     
-    let questionHTML = `
-      <div class="question-header">
-        <div class="question-number">שאלה ${question.id} מתוך ${questions.length}</div>
-      </div>
-      <div class="question-text">${question.text}</div>
-    `;
-    
-    if (question.image) {
-      questionHTML += `
-        <div class="image-container">
-          <img src="/06-2020/images/${question.image}" alt="תמונה לשאלה ${question.id}">
-        </div>
-      `;
-    } else if (question.multipleImages) {
-      questionHTML += `<div class="multiple-images-container">`;
-      for (let i = 0; i < question.images.length; i++) {
-        questionHTML += `
-          <div class="image-container">
-            <div class="image-label">${question.imageLabels[i] || ''}</div>
-            <img src="/06-2020/images/${question.images[i]}" alt="תמונה ${i+1} לשאלה ${question.id}">
-          </div>
-        `;
+    // Render the current question
+    function renderCurrentQuestion() {
+      if (mode === 'exam') {
+        renderExamQuestion();
+      } else {
+        renderStudyMode();
       }
-      questionHTML += `</div>`;
     }
     
-    questionHTML += '<div class="options">';
-    
-    Object.entries(question.options).forEach(([key, value]) => {
-      const isSelected = selectedAnswers[question.id] === key;
-      const isCorrect = showingAnswers && key === question.correctAnswer;
-      const isIncorrect = showingAnswers && isSelected && key !== question.correctAnswer;
+    function renderExamQuestion() {
+      const question = questions[currentQuestionIndex];
+      const questionContainer = document.getElementById('question-container');
       
-      let optionClass = "option";
-      if (isSelected) optionClass += " selected";
-      if (isCorrect) optionClass += " correct";
-      if (isIncorrect) optionClass += " incorrect";
-      
-      questionHTML += `
-        <div class="${optionClass}" onclick="selectAnswer(${question.id}, '${key}')">
-          <div class="option-label">${key}</div>
-          <div class="option-text">${value}</div>
-        </div>
-      `;
-    });
-    
-    questionHTML += '</div>';
-    
-    questionContainer.innerHTML = questionHTML;
-    
-    // Update question counter
-    document.getElementById('question-counter').textContent = `${currentQuestionIndex + 1} / ${questions.length}`;
-    
-    // Show Finish button only on the last question
-    document.getElementById('finish-btn').style.display = 
-      currentQuestionIndex === questions.length - 1 ? 'inline-block' : 'none';
-  }
-  
-  function renderStudyMode() {
-    const questionContainer = document.getElementById('question-container');
-    let allQuestionsHTML = '';
-    
-    questions.forEach(question => {
       let questionHTML = `
-        <div class="question-container">
-          <div class="question-header">
-            <div class="question-number">שאלה ${question.id}</div>
-          </div>
-          <div class="question-text">${question.text}</div>
+        <div class="question-header">
+          <div class="question-number">שאלה ${question.id} מתוך ${questions.length}</div>
+        </div>
+        <div class="question-text">${question.text}</div>
       `;
       
       if (question.image) {
@@ -2242,7 +2178,7 @@
         for (let i = 0; i < question.images.length; i++) {
           questionHTML += `
             <div class="image-container">
-              <div class="image-label">${question.imageLabels[i] || ''}</div>
+              <div class="image-label">${question.imageLabels[i]}</div>
               <img src="/06-2020/images/${question.images[i]}" alt="תמונה ${i+1} לשאלה ${question.id}">
             </div>
           `;
@@ -2253,299 +2189,360 @@
       questionHTML += '<div class="options">';
       
       Object.entries(question.options).forEach(([key, value]) => {
-        const isCorrect = key === question.correctAnswer;
+        const isSelected = selectedAnswers[question.id] === key;
+        const isCorrect = showingAnswers && key === question.correctAnswer;
+        const isIncorrect = showingAnswers && isSelected && key !== question.correctAnswer;
         
         let optionClass = "option";
+        if (isSelected) optionClass += " selected";
         if (isCorrect) optionClass += " correct";
+        if (isIncorrect) optionClass += " incorrect";
         
         questionHTML += `
-          <div class="${optionClass}">
+          <div class="${optionClass}" onclick="selectAnswer(${question.id}, '${key}')">
             <div class="option-label">${key}</div>
             <div class="option-text">${value}</div>
           </div>
         `;
       });
       
-      questionHTML += '</div></div>';
-      allQuestionsHTML += questionHTML;
-    });
-    
-    questionContainer.innerHTML = allQuestionsHTML;
-    
-    // Hide navigation controls in study mode
-    document.getElementById('controls').style.display = 'none';
-  }
-  
-  // Handle selecting an answer
-  function selectAnswer(questionId, answer) {
-    if (showingAnswers) return;
-    
-    selectedAnswers[questionId] = answer;
-    renderCurrentQuestion();
-    
-    // Also update the sidebar to show this question as answered
-    updateSidebarNavigation();
-  }
-  
-  // Navigation functions
-  function nextQuestion() {
-    if (currentQuestionIndex < questions.length - 1) {
-      currentQuestionIndex++;
-      resetShowingAnswers(); // Use the helper function
-      renderCurrentQuestion();
-      updateControls();
-    }
-  }
-  
-  function prevQuestion() {
-    if (currentQuestionIndex > 0) {
-      currentQuestionIndex--;
-      resetShowingAnswers(); // Use the helper function
-      renderCurrentQuestion();
-      updateControls();
-    }
-  }
-
-  // Create a helper function to reset showing answers state
-  function resetShowingAnswers() {
-    showingAnswers = false;
-    const btn = document.getElementById('toggle-answers-btn');
-    if (btn) btn.textContent = 'הצג תשובות';
-    document.getElementById('score-display').style.display = 'none';
-  }
-  
-  // Update navigation button states
-  function updateControls() {
-    const prevBtn = document.getElementById('prev-btn');
-    const nextBtn = document.getElementById('next-btn');
-    
-    prevBtn.disabled = currentQuestionIndex === 0;
-    nextBtn.disabled = currentQuestionIndex === questions.length - 1;
-    
-    if (mode === 'study') {
-      document.getElementById('controls').style.display = 'none';
-      document.getElementById('toggle-answers-btn').style.display = 'none';
-      document.getElementById('sidebar').style.display = 'none';
-    } else {
-      document.getElementById('controls').style.display = 'flex';
-      document.getElementById('toggle-answers-btn').style.display = 'inline-block';
-      document.getElementById('sidebar').style.display = 'block';
+      questionHTML += '</div>';
+      
+      questionContainer.innerHTML = questionHTML;
+      
+      // Update question counter
+      document.getElementById('question-counter').textContent = `${currentQuestionIndex + 1} / ${questions.length}`;
+      
+      // Show Finish button only on the last question
+      document.getElementById('finish-btn').style.display = 
+        currentQuestionIndex === questions.length - 1 ? 'inline-block' : 'none';
     }
     
-    // Update the active question in the sidebar
-    updateSidebarNavigation();
-  }
-  
-  // Generate and update the sidebar navigation
-  function generateSidebarNavigation() {
-    const navContainer = document.getElementById('question-nav');
-    navContainer.innerHTML = '';
-    
-    // Create buttons for all questions
-    for (let i = 0; i < questions.length; i++) {
-      const navItem = document.createElement('div');
-      navItem.className = 'nav-item';
-      navItem.textContent = i + 1;
-      navItem.addEventListener('click', function() {
-        currentQuestionIndex = i;
-        resetShowingAnswers(); // Use the helper function
-        renderCurrentQuestion();
-        updateControls();
+    function renderStudyMode() {
+      const questionContainer = document.getElementById('question-container');
+      let allQuestionsHTML = '';
+      
+      questions.forEach(question => {
+        let questionHTML = `
+          <div class="question-container">
+            <div class="question-header">
+              <div class="question-number">שאלה ${question.id}</div>
+            </div>
+            <div class="question-text">${question.text}</div>
+        `;
+        
+        if (question.image) {
+          questionHTML += `
+            <div class="image-container">
+              <img src="/06-2020/images/${question.image}" alt="תמונה לשאלה ${question.id}">
+            </div>
+          `;
+        } else if (question.multipleImages) {
+          questionHTML += `<div class="multiple-images-container">`;
+          for (let i = 0; i < question.images.length; i++) {
+            questionHTML += `
+              <div class="image-container">
+                <div class="image-label">${question.imageLabels[i]}</div>
+                <img src="/06-2020/images/${question.images[i]}" alt="תמונה ${i+1} לשאלה ${question.id}">
+              </div>
+            `;
+          }
+          questionHTML += `</div>`;
+        }
+        
+        questionHTML += '<div class="options">';
+        
+        Object.entries(question.options).forEach(([key, value]) => {
+          const isCorrect = key === question.correctAnswer;
+          
+          let optionClass = "option";
+          if (isCorrect) optionClass += " correct";
+          
+          questionHTML += `
+            <div class="${optionClass}">
+              <div class="option-label">${key}</div>
+              <div class="option-text">${value}</div>
+            </div>
+          `;
+        });
+        
+        questionHTML += '</div></div>';
+        allQuestionsHTML += questionHTML;
       });
       
-      navContainer.appendChild(navItem);
-    }
-  }
-  
-  // Update the sidebar navigation to highlight current question
-  function updateSidebarNavigation() {
-    if (mode === 'study') return;
-    
-    const navItems = document.querySelectorAll('.nav-item');
-    
-    navItems.forEach((item, index) => {
-      // Remove all special classes first
-      item.classList.remove('active', 'answered');
+      questionContainer.innerHTML = allQuestionsHTML;
       
-      // Add appropriate classes
-      if (index === currentQuestionIndex) {
-        item.classList.add('active');
-      }
-      
-      // Mark questions that have been answered
-      if (selectedAnswers[index + 1]) {
-        item.classList.add('answered');
-      }
-    });
-  }
-  
-  // Toggle showing answers
-  function toggleAnswers() {
-    showingAnswers = !showingAnswers;
-    
-    const btn = document.getElementById('toggle-answers-btn');
-    btn.textContent = showingAnswers ? 'הסתר תשובות' : 'הצג תשובות';
-    
-    if (showingAnswers) {
-      calculateAndShowScore();
-    } else {
-      document.getElementById('score-display').style.display = 'none';
+      // Hide navigation controls in study mode
+      document.getElementById('controls').style.display = 'none';
     }
     
+    // Handle selecting an answer
+    function selectAnswer(questionId, answer) {
+      if (showingAnswers) return;
+      
+      selectedAnswers[questionId] = answer;
+      renderCurrentQuestion();
+    }
+    
+    // Navigation functions
+    // Updated nextQuestion function
+function nextQuestion() {
+  if (currentQuestionIndex < questions.length - 1) {
+    currentQuestionIndex++;
+    resetShowingAnswers(); // Use the helper function
     renderCurrentQuestion();
+    updateControls();
   }
-  
-  // Calculate and display score
-  function calculateAndShowScore() {
-    let correct = 0;
-    let total = Object.keys(selectedAnswers).length;
+}
     
-    Object.entries(selectedAnswers).forEach(([questionId, answer]) => {
-      const question = questions.find(q => q.id === parseInt(questionId));
-      if (question && answer === question.correctAnswer) {
-        correct++;
+    // Updated prevQuestion function
+function prevQuestion() {
+  if (currentQuestionIndex > 0) {
+    currentQuestionIndex--;
+    resetShowingAnswers(); // Use the helper function
+    renderCurrentQuestion();
+    updateControls();
+  }
+}
+
+	  // Create a helper function to reset showing answers state
+function resetShowingAnswers() {
+  showingAnswers = false;
+  const btn = document.getElementById('toggle-answers-btn');
+  if (btn) btn.textContent = 'הצג תשובות';
+  document.getElementById('score-display').style.display = 'none';
+}
+    // Update navigation button states
+    function updateControls() {
+      const prevBtn = document.getElementById('prev-btn');
+      const nextBtn = document.getElementById('next-btn');
+      
+      prevBtn.disabled = currentQuestionIndex === 0;
+      nextBtn.disabled = currentQuestionIndex === questions.length - 1;
+      
+      if (mode === 'study') {
+        document.getElementById('controls').style.display = 'none';
+        document.getElementById('toggle-answers-btn').style.display = 'none';
+        document.getElementById('sidebar').style.display = 'none';
+      } else {
+        document.getElementById('controls').style.display = 'flex';
+        document.getElementById('toggle-answers-btn').style.display = 'inline-block';
+        document.getElementById('sidebar').style.display = 'block';
       }
+      
+      // Update the active question in the sidebar
+      updateSidebarNavigation();
+    }
+    
+    // Generate and update the sidebar navigation
+    // Updated generateSidebarNavigation function
+function generateSidebarNavigation() {
+  const navContainer = document.getElementById('question-nav');
+  navContainer.innerHTML = '';
+  
+  // Create buttons for all questions
+  for (let i = 0; i < questions.length; i++) {
+    const navItem = document.createElement('div');
+    navItem.className = 'nav-item';
+    navItem.textContent = i + 1;
+    navItem.addEventListener('click', function() {
+      currentQuestionIndex = i;
+      resetShowingAnswers(); // Use the helper function
+      renderCurrentQuestion();
+      updateControls();
     });
     
-    const scoreDisplay = document.getElementById('score-display');
-    const scoreText = document.getElementById('score-text');
-    
-    scoreText.textContent = `נכון: ${correct} מתוך ${total} (${total > 0 ? Math.round((correct / total) * 100) : 0}%)`;
-    scoreDisplay.style.display = 'block';
-    
-    return { correct, total };
+    navContainer.appendChild(navItem);
   }
-  
-  // Show results summary
-  function showResults() {
-    // Calculate the score
-    const { correct, total } = calculateResultsData();
-    const percentage = total > 0 ? Math.round((correct / total) * 100) : 0;
+}
     
-    // Get elements
-    const questionContainer = document.getElementById('question-container');
-    const resultsContainer = document.getElementById('results-container');
-    const resultsGrid = document.getElementById('results-grid');
-    const resultsSummary = document.getElementById('results-summary');
-    const controls = document.getElementById('controls');
-    const sidebar = document.getElementById('sidebar');
-    
-    // Hide the question and show results
-    questionContainer.style.display = 'none';
-    resultsContainer.style.display = 'block';
-    controls.style.display = 'none';
-    sidebar.style.display = 'none';
-    
-    // Create the results summary text
-    resultsSummary.innerHTML = `
-      <strong>תשובות נכונות:</strong> ${correct} מתוך ${questions.length} (${percentage}%)<br>
-      <strong>תשובות שגויות:</strong> ${total - correct}<br>
-      <strong>שאלות ללא מענה:</strong> ${questions.length - total}
-    `;
-    
-    // Clear and populate the results grid
-    resultsGrid.innerHTML = '';
-    
-    // Create a grid with all questions
-    for (let i = 0; i < questions.length; i++) {
-      const question = questions[i];
-      const selectedAnswer = selectedAnswers[question.id];
+    // Update the sidebar navigation to highlight current question
+    function updateSidebarNavigation() {
+      if (mode === 'study') return;
       
-      let itemClass = 'result-item';
-      if (!selectedAnswer) {
-        itemClass += ' unanswered';
-      } else if (selectedAnswer === question.correctAnswer) {
-        itemClass += ' correct';
+      const navItems = document.querySelectorAll('.nav-item');
+      
+      navItems.forEach((item, index) => {
+        // Remove all special classes first
+        item.classList.remove('active', 'answered');
+        
+        // Add appropriate classes
+        if (index === currentQuestionIndex) {
+          item.classList.add('active');
+        }
+        
+        // Mark questions that have been answered
+        if (selectedAnswers[index + 1]) {
+          item.classList.add('answered');
+        }
+      });
+    }
+    
+    // Toggle showing answers
+    function toggleAnswers() {
+      showingAnswers = !showingAnswers;
+      
+      const btn = document.getElementById('toggle-answers-btn');
+      btn.textContent = showingAnswers ? 'הסתר תשובות' : 'הצג תשובות';
+      
+      if (showingAnswers) {
+        calculateAndShowScore();
       } else {
-        itemClass += ' incorrect';
+        document.getElementById('score-display').style.display = 'none';
       }
       
-      const resultItem = document.createElement('div');
-      resultItem.className = itemClass;
-      resultItem.innerHTML = `
-        <div class="result-number">${question.id}</div>
-        <div class="result-answer">${selectedAnswer || '-'}</div>
+      renderCurrentQuestion();
+    }
+    
+    // Calculate and display score
+    function calculateAndShowScore() {
+      let correct = 0;
+      let total = Object.keys(selectedAnswers).length;
+      
+      Object.entries(selectedAnswers).forEach(([questionId, answer]) => {
+        const question = questions.find(q => q.id === parseInt(questionId));
+        if (question && answer === question.correctAnswer) {
+          correct++;
+        }
+      });
+      
+      const scoreDisplay = document.getElementById('score-display');
+      const scoreText = document.getElementById('score-text');
+      
+      scoreText.textContent = `נכון: ${correct} מתוך ${total} (${total > 0 ? Math.round((correct / total) * 100) : 0}%)`;
+      scoreDisplay.style.display = 'block';
+      
+      return { correct, total };
+    }
+    
+    // Show results summary
+    function showResults() {
+      // Calculate the score
+      const { correct, total } = calculateResultsData();
+      const percentage = total > 0 ? Math.round((correct / total) * 100) : 0;
+      
+      // Get elements
+      const questionContainer = document.getElementById('question-container');
+      const resultsContainer = document.getElementById('results-container');
+      const resultsGrid = document.getElementById('results-grid');
+      const resultsSummary = document.getElementById('results-summary');
+      const controls = document.getElementById('controls');
+      const sidebar = document.getElementById('sidebar');
+      
+      // Hide the question and show results
+      questionContainer.style.display = 'none';
+      resultsContainer.style.display = 'block';
+      controls.style.display = 'none';
+      sidebar.style.display = 'none';
+      
+      // Create the results summary text
+      resultsSummary.innerHTML = `
+        <strong>תשובות נכונות:</strong> ${correct} מתוך ${questions.length} (${percentage}%)<br>
+        <strong>תשובות שגויות:</strong> ${total - correct}<br>
+        <strong>שאלות ללא מענה:</strong> ${questions.length - total}
       `;
       
-      // Add click event to jump to that question
-      resultItem.addEventListener('click', function() {
-        returnToExam(question.id - 1);
+      // Clear and populate the results grid
+      resultsGrid.innerHTML = '';
+      
+      // Create a grid with all questions
+      for (let i = 0; i < questions.length; i++) {
+        const question = questions[i];
+        const selectedAnswer = selectedAnswers[question.id];
+        
+        let itemClass = 'result-item';
+        if (!selectedAnswer) {
+          itemClass += ' unanswered';
+        } else if (selectedAnswer === question.correctAnswer) {
+          itemClass += ' correct';
+        } else {
+          itemClass += ' incorrect';
+        }
+        
+        const resultItem = document.createElement('div');
+        resultItem.className = itemClass;
+        resultItem.innerHTML = `
+          <div class="result-number">${question.id}</div>
+          <div class="result-answer">${selectedAnswer || '-'}</div>
+        `;
+        
+        // Add click event to jump to that question
+        resultItem.addEventListener('click', function() {
+          returnToExam(question.id - 1);
+        });
+        
+        resultsGrid.appendChild(resultItem);
+      }
+    }
+    
+    // Calculate results data
+    function calculateResultsData() {
+      let correct = 0;
+      let total = Object.keys(selectedAnswers).length;
+      
+      Object.entries(selectedAnswers).forEach(([questionId, answer]) => {
+        const question = questions.find(q => q.id === parseInt(questionId));
+        if (question && answer === question.correctAnswer) {
+          correct++;
+        }
       });
       
-      resultsGrid.appendChild(resultItem);
+      return { correct, total };
     }
+    
+    // Return to the exam
+    // Updated returnToExam function
+function returnToExam(questionIndex = null) {
+  // If a question index is provided, go to that question
+  if (questionIndex !== null) {
+    currentQuestionIndex = questionIndex;
   }
   
-  // Calculate results data
-  function calculateResultsData() {
-    let correct = 0;
-    let total = Object.keys(selectedAnswers).length;
+  resetShowingAnswers(); // Use the helper function
+  
+  // Hide results and show question
+  document.getElementById('results-container').style.display = 'none';
+  document.getElementById('question-container').style.display = 'block';
+  document.getElementById('controls').style.display = 'flex';
+  
+  // Update the current question
+  renderCurrentQuestion();
+  updateControls();
+}
     
-    Object.entries(selectedAnswers).forEach(([questionId, answer]) => {
-      const question = questions.find(q => q.id === parseInt(questionId));
-      if (question && answer === question.correctAnswer) {
-        correct++;
+    // Set the mode (exam or study)
+    function setMode(newMode) {
+      mode = newMode;
+      
+      const examBtn = document.getElementById('exam-mode-btn');
+      const studyBtn = document.getElementById('study-mode-btn');
+      const toggleAnswersBtn = document.getElementById('toggle-answers-btn');
+      
+      if (mode === 'exam') {
+        examBtn.disabled = true;
+        studyBtn.disabled = false;
+        toggleAnswersBtn.style.display = 'inline-block';
+        document.getElementById('score-display').style.display = 'none';
+        document.getElementById('results-container').style.display = 'none';
+        document.getElementById('question-container').style.display = 'block';
+        showingAnswers = false;
+        toggleAnswersBtn.textContent = 'הצג תשובות';
+      } else {
+        examBtn.disabled = false;
+        studyBtn.disabled = true;
+        toggleAnswersBtn.style.display = 'none';
+        document.getElementById('score-display').style.display = 'none';
       }
-    });
-    
-    return { correct, total };
-  }
-  
-  // Return to the exam
-  function returnToExam(questionIndex = null) {
-    // If a question index is provided, go to that question
-    if (questionIndex !== null) {
-      currentQuestionIndex = questionIndex;
+      
+      renderCurrentQuestion();
+      updateControls();
     }
     
-    resetShowingAnswers(); // Use the helper function
-    
-    // Hide results and show question
-    document.getElementById('results-container').style.display = 'none';
-    document.getElementById('question-container').style.display = 'block';
-    document.getElementById('controls').style.display = 'flex';
-    document.getElementById('sidebar').style.display = 'block';
-    
-    // Update the current question
-    renderCurrentQuestion();
-    updateControls();
-  }
-  
-  // Set the mode (exam or study)
-  function setMode(newMode) {
-    mode = newMode;
-    
-    const examBtn = document.getElementById('exam-mode-btn');
-    const studyBtn = document.getElementById('study-mode-btn');
-    const toggleAnswersBtn = document.getElementById('toggle-answers-btn');
-    
-    if (mode === 'exam') {
-      examBtn.disabled = true;
-      studyBtn.disabled = false;
-      toggleAnswersBtn.style.display = 'inline-block';
-      document.getElementById('score-display').style.display = 'none';
-      document.getElementById('results-container').style.display = 'none';
-      document.getElementById('question-container').style.display = 'block';
-      document.getElementById('sidebar').style.display = 'block';
-      showingAnswers = false;
-      toggleAnswersBtn.textContent = 'הצג תשובות';
-    } else {
-      examBtn.disabled = false;
-      studyBtn.disabled = true;
-      toggleAnswersBtn.style.display = 'none';
-      document.getElementById('score-display').style.display = 'none';
-      document.getElementById('sidebar').style.display = 'none';
-    }
-    
-    renderCurrentQuestion();
-    updateControls();
-  }
-  
-  // Initialize the app when the page loads
-  window.onload = function() {
-    generateSidebarNavigation();
-    init();
-  };
-</script>
+    // Initialize the app when the page loads
+    window.onload = function() {
+      generateSidebarNavigation();
+      init();
+    };
+  </script>
 </body>
 </html>
