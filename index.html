@@ -90,37 +90,15 @@
       font-size: 1.2em;
     }
     .image-container {
-  text-align: center;
-  margin: 15px 0;
-  max-width: 100%;
-}
-
-.image-container img {
-  max-width: 100%;
-  height: auto;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  object-fit: contain;
-}
-
-.multiple-images-container {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 15px;
-  margin: 15px 0;
-  width: 100%;
-}
-
-.multiple-images-container .image-container {
-  flex: 1 1 300px;
-  max-width: 100%;
-}
-
-/* Ensure images in the study mode are also properly sized */
-.question-container .image-container img {
-  max-width: 100%;
-}
+      text-align: center;
+      margin: 15px 0;
+    }
+    .image-container img {
+      max-width: 200%;
+      max-height: 600px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
     .options {
       display: flex;
       flex-direction: column;
@@ -190,7 +168,14 @@
     .mode-toggle {
       margin-bottom: 20px;
     }
-       .image-label {
+    .multiple-images-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin: 15px 0;
+    }
+    .image-label {
       text-align: center;
       font-weight: bold;
       margin-bottom: 5px;
@@ -371,7 +356,7 @@
   </div>
   
   <div class="main-content">
-    <h1>בחינת מחלות עיניים - שלב א' מועד 06.2020 </h1>
+    <h1>בחינת מחלות עיניים - שלב א' מועד 06.2020</h1>
     
     <div class="mode-toggle no-print">
       <button id="exam-mode-btn" onclick="setMode('exam')" disabled>מצב בחינה</button>
@@ -405,8 +390,7 @@
       <button id="next-btn" onclick="nextQuestion()">הבא</button>
     </div>
   </div>
-  
-  
+   
 <script>
   // Define the questions
   const questions = [
