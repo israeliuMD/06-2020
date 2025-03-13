@@ -2542,7 +2542,310 @@ function returnToExam(questionIndex = null) {
     window.onload = function() {
       generateSidebarNavigation();
       init();
-    };
+    }
+	    // Copy and paste this code at the end of your JavaScript section, right before the closing </script> tag
+
+// Object to store notes for each question
+let questionNotes = {};
+let notesVisible = false;
+
+// Load notes from localStorage when the page loads
+function loadNotes() {
+  const examId = window.location.pathname.split('/').pop() || document.title.replace(/\s+/g, '-').toLowerCase();
+  const savedNotes = localStorage.getItem(`examNotes-${examId}`);
+  if (savedNotes) {
+    questionNotes = JSON.parse(savedNotes);
+  }
+}
+
+// Save notes to localStorage
+function saveNotes() {
+  const examId = window.location.pathname.split('/').pop() || document.title.replace(/\s+/g, '-').toLowerCase();
+  localStorage.setItem(`examNotes-${examId}`, JSON.stringify(questionNotes));
+}
+
+// Add the left sidebar notes panel
+function addNotesPanel() {
+  // Check if the notes panel already exists
+  if (document.getElementById('notes-sidebar')) {
+    return;
+  }
+  
+  // Create notes toggle button at the top left
+  const toggleButton = document.createElement('button');
+  toggleButton.id = 'toggle-notes-btn';
+  toggleButton.textContent = 'פתח הערות';
+  toggleButton.className = 'notes-toggle-btn';
+  toggleButton.style.position = 'fixed';
+  toggleButton.style.top = '10px';
+  toggleButton.style.left = '10px';
+  toggleButton.style.zIndex = '1000';
+  toggleButton.style.padding = '8px 16px';
+  toggleButton.style.backgroundColor = '#4a90e2';
+  toggleButton.style.color = 'white';
+  toggleButton.style.border = 'none';
+  toggleButton.style.borderRadius = '4px';
+  toggleButton.style.cursor = 'pointer';
+  toggleButton.onclick = toggleNotes;
+  
+  // Create the notes sidebar
+  const notesSidebar = document.createElement('div');
+  notesSidebar.id = 'notes-sidebar';
+  notesSidebar.className = 'notes-sidebar';
+  notesSidebar.style.width = '300px';
+  notesSidebar.style.height = '100vh';
+  notesSidebar.style.position = 'fixed';
+  notesSidebar.style.top = '0';
+  notesSidebar.style.left = '0';
+  notesSidebar.style.backgroundColor = '#f8f8f8';
+  notesSidebar.style.boxShadow = '2px 0 5px rgba(0,0,0,0.1)';
+  notesSidebar.style.padding = '60px 20px 20px 20px';
+  notesSidebar.style.overflowY = 'auto';
+  notesSidebar.style.zIndex = '900';
+  notesSidebar.style.transform = 'translateX(-100%)';
+  notesSidebar.style.transition = 'transform 0.3s ease-in-out';
+  
+  // Create the notes title
+  const notesTitle = document.createElement('div');
+  notesTitle.className = 'notes-title';
+  notesTitle.textContent = 'הערות לשאלה';
+  notesTitle.style.fontWeight = 'bold';
+  notesTitle.style.fontSize = '1.2em';
+  notesTitle.style.marginBottom = '10px';
+  notesTitle.style.textAlign = 'center';
+  notesSidebar.appendChild(notesTitle);
+  
+  // Create close button inside the sidebar
+  const closeButton = document.createElement('button');
+  closeButton.id = 'close-notes-btn';
+  closeButton.textContent = 'סגור';
+  closeButton.style.position = 'absolute';
+  closeButton.style.top = '15px';
+  closeButton.style.right = '15px';
+  closeButton.style.padding = '5px 10px';
+  closeButton.style.backgroundColor = '#e0e0e0';
+  closeButton.style.border = 'none';
+  closeButton.style.borderRadius = '4px';
+  closeButton.style.cursor = 'pointer';
+  closeButton.onclick = closeNotes;
+  notesSidebar.appendChild(closeButton);
+  
+  // Create the notes content div
+  const notesContent = document.createElement('div');
+  notesContent.id = 'notes-content';
+  notesSidebar.appendChild(notesContent);
+  
+  // Add elements to the body
+  document.body.appendChild(toggleButton);
+  document.body.appendChild(notesSidebar);
+}
+
+// Toggle the notes panel visibility
+function toggleNotes() {
+  const notesSidebar = document.getElementById('notes-sidebar');
+  const toggleButton = document.getElementById('toggle-notes-btn');
+  
+  if (notesVisible) {
+    closeNotes();
+  } else {
+    notesSidebar.style.transform = 'translateX(0)';
+    toggleButton.textContent = 'סגור הערות';
+    notesVisible = true;
+    updateNotesContent();
+  }
+}
+
+// Close the notes panel
+function closeNotes() {
+  const notesSidebar = document.getElementById('notes-sidebar');
+  const toggleButton = document.getElementById('toggle-notes-btn');
+  
+  notesSidebar.style.transform = 'translateX(-100%)';
+  toggleButton.textContent = 'פתח הערות';
+  notesVisible = false;
+}
+
+// Update the notes content based on the current question
+function updateNotesContent() {
+  if (!notesVisible) return;
+  
+  const notesContent = document.getElementById('notes-content');
+  const question = questions[currentQuestionIndex];
+  const questionId = question.id;
+  
+  // Create the question number display
+  const questionNumber = document.createElement('div');
+  questionNumber.className = 'question-number-display';
+  questionNumber.textContent = `שאלה ${questionId}`;
+  questionNumber.style.fontWeight = 'bold';
+  questionNumber.style.marginBottom = '10px';
+  questionNumber.style.textAlign = 'center';
+  
+  // Create the notes textarea
+  const notesTextarea = document.createElement('textarea');
+  notesTextarea.className = 'notes-textarea';
+  notesTextarea.id = `notes-${questionId}`;
+  notesTextarea.value = questionNotes[questionId] || '';
+  notesTextarea.placeholder = 'רשום את ההערות שלך כאן...';
+  notesTextarea.style.width = '100%';
+  notesTextarea.style.height = 'calc(100vh - 150px)';
+  notesTextarea.style.padding = '10px';
+  notesTextarea.style.borderRadius = '4px';
+  notesTextarea.style.border = '1px solid #ddd';
+  notesTextarea.style.fontFamily = 'inherit';
+  notesTextarea.style.fontSize = '1em';
+  notesTextarea.style.direction = 'rtl';
+  notesTextarea.style.resize = 'none';
+  
+  // Add event listener to save notes when text changes
+  notesTextarea.addEventListener('input', function() {
+    questionNotes[questionId] = this.value;
+    saveNotes();
+  });
+  
+  // Clear and update content
+  notesContent.innerHTML = '';
+  notesContent.appendChild(questionNumber);
+  notesContent.appendChild(notesTextarea);
+}
+
+// Add notes to study mode
+function addNotesToStudyMode() {
+  // Add notes to study mode for each question
+  const questionContainers = document.querySelectorAll('.question-container');
+  questionContainers.forEach(container => {
+    const questionNumberElem = container.querySelector('.question-number');
+    if (questionNumberElem) {
+      const questionIdMatch = questionNumberElem.textContent.match(/\d+/);
+      if (questionIdMatch) {
+        const questionId = parseInt(questionIdMatch[0]);
+        const questionNoteText = questionNotes[questionId] || '';
+        
+        if (questionNoteText.trim()) {
+          const notesContainer = document.createElement('div');
+          notesContainer.className = 'notes-container';
+          notesContainer.style.marginTop = '20px';
+          notesContainer.style.padding = '10px';
+          notesContainer.style.backgroundColor = '#f0f8ff';
+          notesContainer.style.borderRadius = '8px';
+          notesContainer.style.border = '1px solid #b0c4de';
+          
+          notesContainer.innerHTML = `
+            <div class="notes-label" style="font-weight: bold; margin-bottom: 5px;">הערות אישיות:</div>
+            <div class="notes-text" style="padding: 10px; border: 1px solid #ddd; border-radius: 4px; background-color: #fff; direction: rtl; white-space: pre-wrap;">
+              ${questionNoteText}
+            </div>
+          `;
+          
+          container.appendChild(notesContainer);
+        }
+      }
+    }
+  });
+}
+
+// Modify these existing functions to incorporate notes
+
+// Update the init function
+const originalInit = init;
+init = function() {
+  loadNotes();
+  originalInit();
+  addNotesPanel();
+};
+
+// Reset notes visibility when changing questions
+function resetNotesVisibility() {
+  closeNotes();
+}
+
+// Update the nextQuestion function to reset notes visibility
+const originalNextQuestion = nextQuestion;
+nextQuestion = function() {
+  resetNotesVisibility();
+  originalNextQuestion();
+  if (notesVisible) {
+    updateNotesContent();
+  }
+};
+
+// Update the prevQuestion function to reset notes visibility
+const originalPrevQuestion = prevQuestion;
+prevQuestion = function() {
+  resetNotesVisibility();
+  originalPrevQuestion();
+  if (notesVisible) {
+    updateNotesContent();
+  }
+};
+
+// Update the renderStudyMode function
+const originalRenderStudyMode = renderStudyMode;
+renderStudyMode = function() {
+  originalRenderStudyMode();
+  addNotesToStudyMode();
+  
+  // Hide the notes toggle button in study mode
+  const toggleButton = document.getElementById('toggle-notes-btn');
+  if (toggleButton) {
+    toggleButton.style.display = 'none';
+  }
+};
+
+// Update function for sidebar navigation
+const updateSidebarNavigationOriginal = updateSidebarNavigation;
+updateSidebarNavigation = function() {
+  updateSidebarNavigationOriginal();
+  
+  // Add indicators for questions with notes
+  const navItems = document.querySelectorAll('.nav-item');
+  navItems.forEach((item, index) => {
+    const questionId = index + 1;
+    if (questionNotes[questionId] && questionNotes[questionId].trim() !== '') {
+      // Add a small note indicator
+      if (!item.querySelector('.note-indicator')) {
+        const indicator = document.createElement('div');
+        indicator.className = 'note-indicator';
+        indicator.style.position = 'absolute';
+        indicator.style.top = '3px';
+        indicator.style.right = '3px';
+        indicator.style.width = '6px';
+        indicator.style.height = '6px';
+        indicator.style.borderRadius = '50%';
+        indicator.style.backgroundColor = '#ff9800';
+        item.style.position = 'relative';
+        item.appendChild(indicator);
+      }
+    }
+  });
+};
+
+// Add CSS for the notes feature
+const style = document.createElement('style');
+style.textContent = `
+  @media print {
+    .notes-toggle-btn, .notes-sidebar {
+      display: none !important;
+    }
+    .notes-container {
+      page-break-inside: avoid;
+    }
+  }
+  
+  @media screen and (max-width: 768px) {
+    .notes-sidebar {
+      width: 250px !important;
+    }
+    .notes-toggle-btn {
+      font-size: 0.9em !important;
+      padding: 5px 10px !important;
+    }
+  }
+`;
+document.head.appendChild(style);
+
+// Make sure notes are loaded when the page loads
+window.addEventListener('load', loadNotes);
   </script>
 </body>
 </html>
