@@ -2543,7 +2543,7 @@ function returnToExam(questionIndex = null) {
       generateSidebarNavigation();
       init();
     }
-	    // Add this code right before the closing script tag in your HTML file
+	// Add this code right before the closing +script+ tag in your HTML file
 
 // Object to store notes for each question
 let questionNotes = {};
@@ -2721,8 +2721,16 @@ function addNotesToStudyMode() {
         const questionId = parseInt(questionIdMatch[0]);
         const questionNoteText = questionNotes[questionId] || '';
         
+        // Remove any existing notes container
+        const existingNotes = container.querySelector('.study-notes-container');
+        if (existingNotes) {
+          existingNotes.remove();
+        }
+        
+        // Add notes container if there are notes
         if (questionNoteText.trim()) {
           const notesContainer = document.createElement('div');
+          notesContainer.className = 'study-notes-container';
           notesContainer.style.marginTop = '20px';
           notesContainer.style.padding = '10px';
           notesContainer.style.backgroundColor = '#f0f8ff';
@@ -2775,6 +2783,157 @@ function updateNavIndicators() {
   });
 }
 
+// Create a page to display all notes for printing
+function createPrintableNotesPage() {
+  // Create a new window for the printable notes
+  const printWindow = window.open('', '_blank');
+  
+  // Write the HTML content for the printable page
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html dir="rtl">
+    <head>
+      <title>הערות לבחינה</title>
+      <meta charset="UTF-8">
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          padding: 20px;
+          direction: rtl;
+        }
+        .notes-title {
+          text-align: center;
+          font-size: 24px;
+          margin-bottom: 30px;
+          font-weight: bold;
+        }
+        .question-notes {
+          margin-bottom: 20px;
+          padding: 15px;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          break-inside: avoid;
+        }
+        .question-number {
+          font-weight: bold;
+          margin-bottom: 10px;
+          font-size: 18px;
+          border-bottom: 1px solid #eee;
+          padding-bottom: 5px;
+        }
+        .notes-content {
+          white-space: pre-wrap;
+          padding: 10px;
+          background-color: #f9f9f9;
+          border-radius: 4px;
+          min-height: 40px;
+        }
+        @media print {
+          body {
+            font-size: 12pt;
+          }
+          .no-print {
+            display: none;
+          }
+          .question-notes {
+            page-break-inside: avoid;
+          }
+        }
+        .print-btn {
+          display: block;
+          margin: 20px auto;
+          padding: 10px 20px;
+          background-color: #4a90e2;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 16px;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="notes-title">הערות לבחינה</div>
+      <button class="print-btn no-print" onclick="window.print()">הדפס הערות</button>
+      <div id="notes-container"></div>
+      <button class="print-btn no-print" onclick="window.print()">הדפס הערות</button>
+    </body>
+    </html>
+  `);
+  
+  // Add all notes to the container
+  const notesContainer = printWindow.document.getElementById('notes-container');
+  let hasNotes = false;
+  
+  // Sort question IDs numerically
+  const questionIds = Object.keys(questionNotes)
+    .map(id => parseInt(id))
+    .sort((a, b) => a - b);
+  
+  for (const questionId of questionIds) {
+    const noteText = questionNotes[questionId];
+    if (noteText && noteText.trim()) {
+      hasNotes = true;
+      
+      const questionNotesDiv = printWindow.document.createElement('div');
+      questionNotesDiv.className = 'question-notes';
+      
+      const questionNumberDiv = printWindow.document.createElement('div');
+      questionNumberDiv.className = 'question-number';
+      questionNumberDiv.textContent = `שאלה ${questionId}`;
+      
+      const notesContentDiv = printWindow.document.createElement('div');
+      notesContentDiv.className = 'notes-content';
+      notesContentDiv.textContent = noteText;
+      
+      questionNotesDiv.appendChild(questionNumberDiv);
+      questionNotesDiv.appendChild(notesContentDiv);
+      notesContainer.appendChild(questionNotesDiv);
+    }
+  }
+  
+  // If no notes exist, show a message
+  if (!hasNotes) {
+    const noNotesMessage = printWindow.document.createElement('div');
+    noNotesMessage.style.textAlign = 'center';
+    noNotesMessage.style.margin = '50px 0';
+    noNotesMessage.style.fontSize = '18px';
+    noNotesMessage.style.color = '#666';
+    noNotesMessage.textContent = 'אין הערות שמורות לבחינה זו';
+    notesContainer.appendChild(noNotesMessage);
+  }
+  
+  // Focus the new window
+  printWindow.focus();
+}
+
+// Add a button to print all notes to the results container
+function addPrintNotesButton() {
+  const resultsContainer = document.getElementById('results-container');
+  if (!resultsContainer) return;
+  
+  // Check if button already exists
+  if (document.getElementById('print-notes-btn')) return;
+  
+  const printNotesBtn = document.createElement('button');
+  printNotesBtn.id = 'print-notes-btn';
+  printNotesBtn.className = 'return-to-exam no-print';
+  printNotesBtn.textContent = 'הדפס הערות';
+  printNotesBtn.style.backgroundColor = '#4a90e2';
+  printNotesBtn.style.marginRight = '10px';
+  printNotesBtn.onclick = createPrintableNotesPage;
+  
+  // Get the print button that already exists
+  const printBtn = document.getElementById('print-btn');
+  if (printBtn) {
+    // Insert the new button before the print button
+    resultsContainer.insertBefore(printNotesBtn, printBtn);
+  } else {
+    // Or just append it if print button isn't found
+    resultsContainer.appendChild(printNotesBtn);
+  }
+}
+
 // Add CSS for print media
 function addNoteStyles() {
   const style = document.createElement('style');
@@ -2814,6 +2973,14 @@ prevQuestion = function() {
   originalPrevQuestion();
 };
 
+// Modified renderStudyMode function to add notes in study mode
+const originalRenderStudyMode = renderStudyMode;
+renderStudyMode = function() {
+  originalRenderStudyMode();
+  // Add notes to study mode
+  setTimeout(addNotesToStudyMode, 100);
+};
+
 // Modified setMode function to handle study mode
 const originalSetMode = setMode;
 setMode = function(newMode) {
@@ -2825,11 +2992,18 @@ setMode = function(newMode) {
     if (mode === 'study') {
       toggleButton.style.display = 'none';
       closeNotes();
-      addNotesToStudyMode();
     } else {
       toggleButton.style.display = 'block';
     }
   }
+};
+
+// Modified showResults function to add print notes button
+const originalShowResults = showResults;
+showResults = function() {
+  originalShowResults();
+  // Add print notes button to results
+  setTimeout(addPrintNotesButton, 100);
 };
 
 // Initialize the notes functionality
