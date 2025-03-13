@@ -2907,7 +2907,7 @@ function createPrintableNotesPage() {
   printWindow.focus();
 }
 
-// Add a button to print all notes to the results container
+// Modify the addPrintNotesButton function to place the button properly
 function addPrintNotesButton() {
   const resultsContainer = document.getElementById('results-container');
   if (!resultsContainer) return;
@@ -2920,16 +2920,19 @@ function addPrintNotesButton() {
   printNotesBtn.className = 'return-to-exam no-print';
   printNotesBtn.textContent = 'הדפס הערות';
   printNotesBtn.style.backgroundColor = '#4a90e2';
-  printNotesBtn.style.marginRight = '10px';
+  printNotesBtn.style.display = 'block';
+  printNotesBtn.style.margin = '20px auto';
   printNotesBtn.onclick = createPrintableNotesPage;
   
-  // Get the print button that already exists
+  // Get the return button
+  const returnBtn = document.getElementById('return-btn');
   const printBtn = document.getElementById('print-btn');
-  if (printBtn) {
-    // Insert the new button before the print button
+  
+  if (returnBtn && printBtn) {
+    // Add it after the return button, before print button
     resultsContainer.insertBefore(printNotesBtn, printBtn);
   } else {
-    // Or just append it if print button isn't found
+    // Just append it if the other buttons aren't found
     resultsContainer.appendChild(printNotesBtn);
   }
 }
