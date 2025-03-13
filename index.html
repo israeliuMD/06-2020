@@ -2543,7 +2543,7 @@ function returnToExam(questionIndex = null) {
       generateSidebarNavigation();
       init();
     }
-	    // Copy and paste this code at the end of your JavaScript section, right before the closing </script> tag
+	    // Add this code right before the closing </script> tag in your HTML file
 
 // Object to store notes for each question
 let questionNotes = {};
@@ -2554,7 +2554,12 @@ function loadNotes() {
   const examId = window.location.pathname.split('/').pop() || document.title.replace(/\s+/g, '-').toLowerCase();
   const savedNotes = localStorage.getItem(`examNotes-${examId}`);
   if (savedNotes) {
-    questionNotes = JSON.parse(savedNotes);
+    try {
+      questionNotes = JSON.parse(savedNotes);
+    } catch (e) {
+      // If parsing fails, start with empty notes
+      questionNotes = {};
+    }
   }
 }
 
@@ -2566,16 +2571,10 @@ function saveNotes() {
 
 // Add the left sidebar notes panel
 function addNotesPanel() {
-  // Check if the notes panel already exists
-  if (document.getElementById('notes-sidebar')) {
-    return;
-  }
-  
   // Create notes toggle button at the top left
   const toggleButton = document.createElement('button');
   toggleButton.id = 'toggle-notes-btn';
   toggleButton.textContent = 'פתח הערות';
-  toggleButton.className = 'notes-toggle-btn';
   toggleButton.style.position = 'fixed';
   toggleButton.style.top = '10px';
   toggleButton.style.left = '10px';
@@ -2586,12 +2585,12 @@ function addNotesPanel() {
   toggleButton.style.border = 'none';
   toggleButton.style.borderRadius = '4px';
   toggleButton.style.cursor = 'pointer';
+  toggleButton.style.fontFamily = 'Arial, sans-serif';
   toggleButton.onclick = toggleNotes;
   
   // Create the notes sidebar
   const notesSidebar = document.createElement('div');
   notesSidebar.id = 'notes-sidebar';
-  notesSidebar.className = 'notes-sidebar';
   notesSidebar.style.width = '300px';
   notesSidebar.style.height = '100vh';
   notesSidebar.style.position = 'fixed';
@@ -2607,17 +2606,16 @@ function addNotesPanel() {
   
   // Create the notes title
   const notesTitle = document.createElement('div');
-  notesTitle.className = 'notes-title';
   notesTitle.textContent = 'הערות לשאלה';
   notesTitle.style.fontWeight = 'bold';
   notesTitle.style.fontSize = '1.2em';
   notesTitle.style.marginBottom = '10px';
   notesTitle.style.textAlign = 'center';
+  notesTitle.style.fontFamily = 'Arial, sans-serif';
   notesSidebar.appendChild(notesTitle);
   
   // Create close button inside the sidebar
   const closeButton = document.createElement('button');
-  closeButton.id = 'close-notes-btn';
   closeButton.textContent = 'סגור';
   closeButton.style.position = 'absolute';
   closeButton.style.top = '15px';
@@ -2627,6 +2625,7 @@ function addNotesPanel() {
   closeButton.style.border = 'none';
   closeButton.style.borderRadius = '4px';
   closeButton.style.cursor = 'pointer';
+  closeButton.style.fontFamily = 'Arial, sans-serif';
   closeButton.onclick = closeNotes;
   notesSidebar.appendChild(closeButton);
   
@@ -2673,17 +2672,20 @@ function updateNotesContent() {
   const question = questions[currentQuestionIndex];
   const questionId = question.id;
   
+  // Clear previous content
+  notesContent.innerHTML = '';
+  
   // Create the question number display
   const questionNumber = document.createElement('div');
-  questionNumber.className = 'question-number-display';
   questionNumber.textContent = `שאלה ${questionId}`;
   questionNumber.style.fontWeight = 'bold';
   questionNumber.style.marginBottom = '10px';
   questionNumber.style.textAlign = 'center';
+  questionNumber.style.fontFamily = 'Arial, sans-serif';
+  notesContent.appendChild(questionNumber);
   
   // Create the notes textarea
   const notesTextarea = document.createElement('textarea');
-  notesTextarea.className = 'notes-textarea';
   notesTextarea.id = `notes-${questionId}`;
   notesTextarea.value = questionNotes[questionId] || '';
   notesTextarea.placeholder = 'רשום את ההערות שלך כאן...';
@@ -2692,26 +2694,24 @@ function updateNotesContent() {
   notesTextarea.style.padding = '10px';
   notesTextarea.style.borderRadius = '4px';
   notesTextarea.style.border = '1px solid #ddd';
-  notesTextarea.style.fontFamily = 'inherit';
+  notesTextarea.style.fontFamily = 'Arial, sans-serif';
   notesTextarea.style.fontSize = '1em';
   notesTextarea.style.direction = 'rtl';
   notesTextarea.style.resize = 'none';
+  notesTextarea.style.boxSizing = 'border-box';
   
   // Add event listener to save notes when text changes
   notesTextarea.addEventListener('input', function() {
     questionNotes[questionId] = this.value;
     saveNotes();
+    updateNavIndicators();
   });
   
-  // Clear and update content
-  notesContent.innerHTML = '';
-  notesContent.appendChild(questionNumber);
   notesContent.appendChild(notesTextarea);
 }
 
 // Add notes to study mode
 function addNotesToStudyMode() {
-  // Add notes to study mode for each question
   const questionContainers = document.querySelectorAll('.question-container');
   questionContainers.forEach(container => {
     const questionNumberElem = container.querySelector('.question-number');
@@ -2723,7 +2723,6 @@ function addNotesToStudyMode() {
         
         if (questionNoteText.trim()) {
           const notesContainer = document.createElement('div');
-          notesContainer.className = 'notes-container';
           notesContainer.style.marginTop = '20px';
           notesContainer.style.padding = '10px';
           notesContainer.style.backgroundColor = '#f0f8ff';
@@ -2731,8 +2730,8 @@ function addNotesToStudyMode() {
           notesContainer.style.border = '1px solid #b0c4de';
           
           notesContainer.innerHTML = `
-            <div class="notes-label" style="font-weight: bold; margin-bottom: 5px;">הערות אישיות:</div>
-            <div class="notes-text" style="padding: 10px; border: 1px solid #ddd; border-radius: 4px; background-color: #fff; direction: rtl; white-space: pre-wrap;">
+            <div style="font-weight: bold; margin-bottom: 5px; font-family: Arial, sans-serif;">הערות אישיות:</div>
+            <div style="padding: 10px; border: 1px solid #ddd; border-radius: 4px; background-color: #fff; direction: rtl; white-space: pre-wrap; font-family: Arial, sans-serif;">
               ${questionNoteText}
             </div>
           `;
@@ -2744,108 +2743,102 @@ function addNotesToStudyMode() {
   });
 }
 
-// Modify these existing functions to incorporate notes
-
-// Update the init function
-const originalInit = init;
-init = function() {
-  loadNotes();
-  originalInit();
-  addNotesPanel();
-};
-
-// Reset notes visibility when changing questions
-function resetNotesVisibility() {
-  closeNotes();
-}
-
-// Update the nextQuestion function to reset notes visibility
-const originalNextQuestion = nextQuestion;
-nextQuestion = function() {
-  resetNotesVisibility();
-  originalNextQuestion();
-  if (notesVisible) {
-    updateNotesContent();
-  }
-};
-
-// Update the prevQuestion function to reset notes visibility
-const originalPrevQuestion = prevQuestion;
-prevQuestion = function() {
-  resetNotesVisibility();
-  originalPrevQuestion();
-  if (notesVisible) {
-    updateNotesContent();
-  }
-};
-
-// Update the renderStudyMode function
-const originalRenderStudyMode = renderStudyMode;
-renderStudyMode = function() {
-  originalRenderStudyMode();
-  addNotesToStudyMode();
-  
-  // Hide the notes toggle button in study mode
-  const toggleButton = document.getElementById('toggle-notes-btn');
-  if (toggleButton) {
-    toggleButton.style.display = 'none';
-  }
-};
-
-// Update function for sidebar navigation
-const updateSidebarNavigationOriginal = updateSidebarNavigation;
-updateSidebarNavigation = function() {
-  updateSidebarNavigationOriginal();
-  
-  // Add indicators for questions with notes
+// Add indicators to navigation buttons for questions with notes
+function updateNavIndicators() {
   const navItems = document.querySelectorAll('.nav-item');
+  
   navItems.forEach((item, index) => {
     const questionId = index + 1;
+    
+    // Remove any existing indicators
+    const existingIndicator = item.querySelector('.note-indicator');
+    if (existingIndicator) {
+      existingIndicator.remove();
+    }
+    
+    // Add indicator if there are notes for this question
     if (questionNotes[questionId] && questionNotes[questionId].trim() !== '') {
-      // Add a small note indicator
-      if (!item.querySelector('.note-indicator')) {
-        const indicator = document.createElement('div');
-        indicator.className = 'note-indicator';
-        indicator.style.position = 'absolute';
-        indicator.style.top = '3px';
-        indicator.style.right = '3px';
-        indicator.style.width = '6px';
-        indicator.style.height = '6px';
-        indicator.style.borderRadius = '50%';
-        indicator.style.backgroundColor = '#ff9800';
-        item.style.position = 'relative';
-        item.appendChild(indicator);
-      }
+      const indicator = document.createElement('div');
+      indicator.className = 'note-indicator';
+      indicator.style.position = 'absolute';
+      indicator.style.top = '3px';
+      indicator.style.right = '3px';
+      indicator.style.width = '6px';
+      indicator.style.height = '6px';
+      indicator.style.borderRadius = '50%';
+      indicator.style.backgroundColor = '#ff9800';
+      
+      // Make sure the nav item has relative positioning for absolute positioning of the indicator
+      item.style.position = 'relative';
+      item.appendChild(indicator);
     }
   });
+}
+
+// Add CSS for print media
+function addNoteStyles() {
+  const style = document.createElement('style');
+  style.textContent = `
+    @media print {
+      #toggle-notes-btn, #notes-sidebar {
+        display: none !important;
+      }
+    }
+    
+    @media screen and (max-width: 768px) {
+      #notes-sidebar {
+        width: 250px !important;
+      }
+      #toggle-notes-btn {
+        font-size: 0.9em !important;
+        padding: 5px 10px !important;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+// Override existing functions to integrate notes functionality
+
+// Modified nextQuestion function to handle notes
+const originalNextQuestion = nextQuestion;
+nextQuestion = function() {
+  closeNotes(); // Close notes panel when changing questions
+  originalNextQuestion();
 };
 
-// Add CSS for the notes feature
-const style = document.createElement('style');
-style.textContent = `
-  @media print {
-    .notes-toggle-btn, .notes-sidebar {
-      display: none !important;
-    }
-    .notes-container {
-      page-break-inside: avoid;
-    }
-  }
-  
-  @media screen and (max-width: 768px) {
-    .notes-sidebar {
-      width: 250px !important;
-    }
-    .notes-toggle-btn {
-      font-size: 0.9em !important;
-      padding: 5px 10px !important;
-    }
-  }
-`;
-document.head.appendChild(style);
+// Modified prevQuestion function to handle notes
+const originalPrevQuestion = prevQuestion;
+prevQuestion = function() {
+  closeNotes(); // Close notes panel when changing questions
+  originalPrevQuestion();
+};
 
-// Make sure notes are loaded when the page loads
-window.addEventListener('load', loadNotes);
+// Modified setMode function to handle study mode
+const originalSetMode = setMode;
+setMode = function(newMode) {
+  originalSetMode(newMode);
+  
+  // Handle notes panel visibility based on mode
+  const toggleButton = document.getElementById('toggle-notes-btn');
+  if (toggleButton) {
+    if (mode === 'study') {
+      toggleButton.style.display = 'none';
+      closeNotes();
+      addNotesToStudyMode();
+    } else {
+      toggleButton.style.display = 'block';
+    }
+  }
+};
+
+// Initialize the notes functionality
+window.addEventListener('load', function() {
+  loadNotes();
+  addNotesPanel();
+  addNoteStyles();
+  updateNavIndicators();
+});
   </script>
 </body>
 </html>
