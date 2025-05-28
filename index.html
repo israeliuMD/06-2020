@@ -2393,15 +2393,15 @@ function renderStudyMode() {
 
 // Update the addNotesToStudyMode function to work with the new structure
 function addNotesToStudyMode() {
-  const questionContainers = document.querySelectorAll('.question-container');
+  const questionContainers = document.querySelectorAll('.question-container');}
   questionContainers.forEach(container => {
-    const questionNumberElem = container.querySelector('.question-number');
+    const questionNumberElem = container.querySelector('.question-number');}
     if (questionNumberElem) {
-      const questionIdMatch = questionNumberElem.textContent.match(/\d+/);
+      const questionIdMatch = questionNumberElem.textContent.match(/\d+/);}
       if (questionIdMatch) {
         const questionId = parseInt(questionIdMatch[0]);
         const questionNoteText = questionNotes[questionId] || '';
-        
+	}
         // Remove any existing notes container
         const existingNotes = container.querySelector('.study-notes-container');
         if (existingNotes) {
