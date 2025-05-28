@@ -3688,34 +3688,8 @@ addNotesToStudyMode = function() {
           existingNotes.remove();
         }
         
-        // Only add notes container if there are notes or a reference exists
-        if (questionNoteText.trim() || questionReferences[questionId]) {
-          const notesContainer = document.createElement('div');
-          notesContainer.className = 'study-notes-container';
-          notesContainer.style.marginTop = '20px';
-          notesContainer.style.padding = '10px';
-          notesContainer.style.backgroundColor = '#f0f8ff';
-          notesContainer.style.borderRadius = '8px';
-          notesContainer.style.border = '1px solid #b0c4de';
-          
-          let notesHTML = '<div style="font-weight: bold; margin-bottom: 5px; font-family: Arial, sans-serif;">הערות אישיות:</div>';
-          
-          // Add reference if available
-          if (questionReferences[questionId]) {
-            notesHTML += `<div style="padding: 8px; margin-bottom: 10px; background-color: #e6f2ff; border-radius: 4px; border-right: 3px solid #4a90e2; font-family: Arial, sans-serif; font-size: 0.9em; direction: rtl;">${questionReferences[questionId]}</div>`;
-          }
-          
-          // Add user notes if available
-          if (questionNoteText.trim()) {
-            notesHTML += `<div style="padding: 10px; border: 1px solid #ddd; border-radius: 4px; background-color: #fff; direction: rtl; white-space: pre-wrap; font-family: Arial, sans-serif;">${questionNoteText}</div>`;
-          }
-          
-          notesContainer.innerHTML = notesHTML;
-          container.appendChild(notesContainer);
-        }
-      }
-    }
-  });
+        // Only add notes container if there are notes or a reference exists, deleted
+       
 };
 
 // Override the existing createPrintableNotesPage function
