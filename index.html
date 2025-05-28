@@ -377,28 +377,6 @@
   padding: 6px 12px;
   font-size: 0.9em;
 }
-	  /* Study mode specific styling - only applies in study mode */
-.study-mode .answer-summary-correct {
-  margin-top: 10px;
-  padding: 8px 12px;
-  border-radius: 4px;
-  font-weight: bold;
-  text-align: center;
-  background-color: #e8f5e9;
-  color: #2e7d32;
-  border: 1px solid #4caf50;
-}
-
-.study-mode .answer-summary-incorrect {
-  margin-top: 10px;
-  padding: 8px 12px;
-  border-radius: 4px;
-  font-weight: bold;
-  text-align: center;
-  background-color: #ffebee;
-  color: #c62828;
-  border: 1px solid #f44336;
-}
   </style>
 </head>
 <body>
@@ -2278,195 +2256,63 @@
         currentQuestionIndex === questions.length - 1 ? 'inline-block' : 'none';
     }
     
-    // This replaces the existing renderStudyMode function
-function renderStudyMode() {
-  const questionContainer = document.getElementById('question-container');
-  let allQuestionsHTML = '';
-  
-  questions.forEach(question => {
-    let questionHTML = `
-      <div class="question-container">
-        <div class="question-header">
-          <div class="question-number">שאלה ${question.id}</div>
-        </div>
-        <div class="question-text">${question.text}</div>
-    `;
-    
-    if (question.image) {
-      questionHTML += `
-        <div class="image-container">
-          <img src="/06-2020/images/${question.image}" alt="תמונה לשאלה ${question.id}">
-        </div>
-      `;
-    } else if (question.multipleImages) {
-      questionHTML += `<div class="multiple-images-container">`;
-      for (let i = 0; i < question.images.length; i++) {
-        questionHTML += `
-          <div class="image-container">
-            <div class="image-label">${question.imageLabels[i]}</div>
-            <img src="/06-2020/images/${question.images[i]}" alt="תמונה ${i+1} לשאלה ${question.id}">
-          </div>
+    function renderStudyMode() {
+      const questionContainer = document.getElementById('question-container');
+      let allQuestionsHTML = '';
+      
+      questions.forEach(question => {
+        let questionHTML = `
+          <div class="question-container">
+            <div class="question-header">
+              <div class="question-number">שאלה ${question.id}</div>
+            </div>
+            <div class="question-text">${question.text}</div>
         `;
-      }
-      questionHTML += `</div>`;
-    }
-    
-    questionHTML += '<div class="options">';
-    
-    // Get the selected answer for this question
-    const selectedAnswer = selectedAnswers[question.id];
-    
-    Object.entries(question.options).forEach(([key, value]) => {
-      const isCorrect = key === question.correctAnswer;
-      const isSelected = selectedAnswer === key;
-      const isIncorrect = isSelected && !isCorrect;
-      
-      let optionClass = "option";
-      
-      // Apply styling based on correctness and selection
-      if (isCorrect) {
-        optionClass += " correct";
-      }
-      if (isIncorrect) {
-        optionClass += " incorrect";
-      }
-      if (isSelected && !isCorrect) {
-        // If selected but wrong, add both selected and incorrect classes
-        optionClass += " selected";
-      }
-      
-      // Add selection indicators in the text
-      let optionText = value;
-      if (isSelected && isCorrect) {
-        optionText = `✓ ${value}`;
-      } else if (isSelected && !isCorrect) {
-        optionText = `✗ ${value}`;
-      } else if (isCorrect && selectedAnswer) {
-        optionText = `✓ ${value}`;
-      }
-      
-      questionHTML += `
-        <div class="${optionClass}">
-          <div class="option-label">${key}</div>
-          <div class="option-text">${optionText}</div>
-        </div>
-      `;
-    });
-    
-    questionHTML += '</div>';
-    
-    // Add answer summary if question was answered
-    if (selectedAnswer) {
-      const isCorrect = selectedAnswer === question.correctAnswer;
-      const summaryClass = isCorrect ? 'answer-summary-correct' : 'answer-summary-incorrect';
-      const summaryText = isCorrect ? 
-        `✓ תשובה נכונה: ${selectedAnswer}` : 
-        `✗ בחרת: ${selectedAnswer} | נכון: ${question.correctAnswer}`;
-      
-      questionHTML += `
-        <div class="${summaryClass}" style="
-          margin-top: 10px;
-          padding: 8px 12px;
-          border-radius: 4px;
-          font-weight: bold;
-          text-align: center;
-          ${isCorrect ? 
-            'background-color: #e8f5e9; color: #2e7d32; border: 1px solid #4caf50;' : 
-            'background-color: #ffebee; color: #c62828; border: 1px solid #f44336;'
-          }
-        ">
-          ${summaryText}
-        </div>
-      `;
-    }
-    
-    questionHTML += '</div>';
-    allQuestionsHTML += questionHTML;
-  });
-  
-  questionContainer.innerHTML = allQuestionsHTML;
-  
-  // Hide navigation controls in study mode
-  document.getElementById('controls').style.display = 'none';
-  
-}
-
-// Update the addNotesToStudyMode function to work with the new structure
-function addNotesToStudyMode() {
-  const questionContainers = document.querySelectorAll('.question-container');
-
-  questionContainers.forEach(container => {
-    const numberEl = container.querySelector('.question-number');
-    if (!numberEl) return;
-
-    const m = numberEl.textContent.match(/\d+/);
-    if (!m) return;
-
-    const questionId       = parseInt(m[0], 10);
-    const questionNoteText = questionNotes[questionId] || '';
-
-    // ── clean up any older box ────────────────────────────────
-    const existing = container.querySelector('.study-notes-container');
-    if (existing) existing.remove();
-
-    // ── create a new one only if there is content ─────────────
-    if (questionNoteText.trim() || questionReferences[questionId]) {
-      const box = document.createElement('div');
-      box.className = 'study-notes-container';
-      box.style.cssText = `
-        margin-top:20px;padding:10px;background:#f0f8ff;
-        border:1px solid #b0c4de;border-radius:8px;`;
-
-      let html = '<div style="font-weight:bold;margin-bottom:5px;">הערות אישיות:</div>';
-
-      if (questionReferences[questionId]) {
-        html += `<div style="padding:8px;margin-bottom:10px;
-                  background:#e6f2ff;border-radius:4px;
-                  border-right:3px solid #4a90e2;font-size:.9em;">
-                   ${questionReferences[questionId]}
-                 </div>`;
-      }
-
-      if (questionNoteText.trim()) {
-        html += `<div style="padding:10px;border:1px solid #ddd;
-                  border-radius:4px;background:#fff;white-space:pre-wrap;">
-                   ${questionNoteText}
-                 </div>`;
-      }
-
-      box.innerHTML = html;
-      container.appendChild(box);
-    }
-  }); // ← now we close the forEach
-}       // ← and only here we close the function
-
         
-        // Only add notes container if there are notes or a reference exists
-        if (questionNoteText.trim() || questionReferences[questionId]) {
-          const notesContainer = document.createElement('div');
-          notesContainer.className = 'study-notes-container';
-          notesContainer.style.marginTop = '20px';
-          notesContainer.style.padding = '10px';
-          notesContainer.style.backgroundColor = '#f0f8ff';
-          notesContainer.style.borderRadius = '8px';
-          notesContainer.style.border = '1px solid #b0c4de';
-          
-          let notesHTML = '<div style="font-weight: bold; margin-bottom: 5px; font-family: Arial, sans-serif;">מידע נוסף:</div>';
-          
-          // Add reference if available
-          if (questionReferences[questionId]) {
-            notesHTML += `<div style="padding: 8px; margin-bottom: 10px; background-color: #e6f2ff; border-radius: 4px; border-right: 3px solid #4a90e2; font-family: Arial, sans-serif; font-size: 0.9em; direction: rtl;"><strong>מקור:</strong> ${questionReferences[questionId]}</div>`;
+        if (question.image) {
+          questionHTML += `
+            <div class="image-container">
+              <img src="/06-2020/images/${question.image}" alt="תמונה לשאלה ${question.id}">
+            </div>
+          `;
+        } else if (question.multipleImages) {
+          questionHTML += `<div class="multiple-images-container">`;
+          for (let i = 0; i < question.images.length; i++) {
+            questionHTML += `
+              <div class="image-container">
+                <div class="image-label">${question.imageLabels[i]}</div>
+                <img src="/06-2020/images/${question.images[i]}" alt="תמונה ${i+1} לשאלה ${question.id}">
+              </div>
+            `;
           }
+          questionHTML += `</div>`;
+        }
+        
+        questionHTML += '<div class="options">';
+        
+        Object.entries(question.options).forEach(([key, value]) => {
+          const isCorrect = key === question.correctAnswer;
           
-          // Add user notes if available
-          if (questionNoteText.trim()) {
-            notesHTML += `<div style="padding: 10px; border: 1px solid #ddd; border-radius: 4px; background-color: #fff; direction: rtl; white-space: pre-wrap; font-family: Arial, sans-serif;"><strong>הערות אישיות:</strong><br>${questionNoteText}</div>`;
-          }
+          let optionClass = "option";
+          if (isCorrect) optionClass += " correct";
           
-          notesContainer.innerHTML = notesHTML;
-  // Add notes after a short delay to ensure DOM is ready
-  setTimeout(addNotesToStudyMode, 100);
-}
+          questionHTML += `
+            <div class="${optionClass}">
+              <div class="option-label">${key}</div>
+              <div class="option-text">${value}</div>
+            </div>
+          `;
+        });
+        
+        questionHTML += '</div></div>';
+        allQuestionsHTML += questionHTML;
+      });
+      
+      questionContainer.innerHTML = allQuestionsHTML;
+      
+      // Hide navigation controls in study mode
+      document.getElementById('controls').style.display = 'none';
+    }
     
     // Handle selecting an answer
     function selectAnswer(questionId, answer) {
@@ -2729,7 +2575,6 @@ function returnToExam(questionIndex = null) {
       if (mode === 'exam') {
         examBtn.disabled = true;
         studyBtn.disabled = false;
-	      document.body.classList.remove('study-mode'); // Remove study mode class
         toggleAnswersBtn.style.display = 'inline-block';
         document.getElementById('score-display').style.display = 'none';
         document.getElementById('results-container').style.display = 'none';
@@ -2739,7 +2584,6 @@ function returnToExam(questionIndex = null) {
       } else {
         examBtn.disabled = false;
         studyBtn.disabled = true;
-	      document.body.classList.add('study-mode'); // Add study mode class
         toggleAnswersBtn.style.display = 'none';
         document.getElementById('score-display').style.display = 'none';
       }
@@ -3688,8 +3532,34 @@ addNotesToStudyMode = function() {
           existingNotes.remove();
         }
         
-        // Only add notes container if there are notes or a reference exists, deleted
-       
+        // Only add notes container if there are notes or a reference exists
+        if (questionNoteText.trim() || questionReferences[questionId]) {
+          const notesContainer = document.createElement('div');
+          notesContainer.className = 'study-notes-container';
+          notesContainer.style.marginTop = '20px';
+          notesContainer.style.padding = '10px';
+          notesContainer.style.backgroundColor = '#f0f8ff';
+          notesContainer.style.borderRadius = '8px';
+          notesContainer.style.border = '1px solid #b0c4de';
+          
+          let notesHTML = '<div style="font-weight: bold; margin-bottom: 5px; font-family: Arial, sans-serif;">הערות אישיות:</div>';
+          
+          // Add reference if available
+          if (questionReferences[questionId]) {
+            notesHTML += `<div style="padding: 8px; margin-bottom: 10px; background-color: #e6f2ff; border-radius: 4px; border-right: 3px solid #4a90e2; font-family: Arial, sans-serif; font-size: 0.9em; direction: rtl;">${questionReferences[questionId]}</div>`;
+          }
+          
+          // Add user notes if available
+          if (questionNoteText.trim()) {
+            notesHTML += `<div style="padding: 10px; border: 1px solid #ddd; border-radius: 4px; background-color: #fff; direction: rtl; white-space: pre-wrap; font-family: Arial, sans-serif;">${questionNoteText}</div>`;
+          }
+          
+          notesContainer.innerHTML = notesHTML;
+          container.appendChild(notesContainer);
+        }
+      }
+    }
+  });
 };
 
 // Override the existing createPrintableNotesPage function
