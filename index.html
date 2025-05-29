@@ -3725,6 +3725,495 @@ window.onload = function() {
     loadExamState();
   }, 100);
 };
+	// Create comprehensive exam summary page for printing
+function createComprehensiveSummary() {
+  // Create a new window for the comprehensive summary
+  const summaryWindow = window.open('', '_blank');
+  
+  // Write the HTML content for the comprehensive summary page
+  summaryWindow.document.write(`
+    <!DOCTYPE html>
+    <html lang="he" dir="rtl">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>סיכום בחינה 06-2020</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          margin: 0;
+          padding: 20px;
+          background-color: #f5f5f5;
+          direction: rtl;
+        }
+        
+        .summary-title {
+          text-align: center;
+          font-size: 28px;
+          font-weight: bold;
+          margin-bottom: 30px;
+          color: #333;
+        }
+        
+        .question-container {
+          background-color: white;
+          border-radius: 8px;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          padding: 20px;
+          margin-bottom: 20px;
+          break-inside: avoid;
+        }
+        
+        .question-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 15px;
+        }
+        
+        .question-number {
+          font-weight: bold;
+          font-size: 1.2em;
+        }
+        
+        .result-indicator {
+          font-size: 1.5em;
+          font-weight: bold;
+        }
+        
+        .result-indicator.correct {
+          color: #4caf50;
+        }
+        
+        .result-indicator.incorrect {
+          color: #f44336;
+        }
+        
+        .result-indicator.unanswered {
+          color: #999;
+        }
+        
+        .image-container {
+          text-align: center;
+          margin: 15px 0;
+        }
+        
+        .image-container img {
+          max-width: 100%;
+          max-height: 400px;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+        }
+        
+        .multiple-images-container {
+          display: flex;
+          justify-content: center;
+          flex-wrap: wrap;
+          gap: 15px;
+          margin: 15px 0;
+        }
+        
+        .image-label {
+          text-align: center;
+          font-weight: bold;
+          margin-bottom: 5px;
+        }
+        
+        .options {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          margin-bottom: 15px;
+        }
+        
+        .option {
+          padding: 10px;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          display: flex;
+          align-items: flex-start;
+        }
+        
+        .option.correct {
+          border-color: #4caf50;
+          background-color: #e8f5e9;
+          font-weight: bold;
+        }
+        
+        .option.incorrect {
+          border-color: #f44336;
+          background-color: #ffebee;
+          font-weight: bold;
+        }
+        
+        .option-label {
+          font-weight: bold;
+          margin-left: 10px;
+          min-width: 20px;
+        }
+        
+        .notes-section {
+          margin-top: 15px;
+          padding: 10px;
+          background-color: #f0f8ff;
+          border-radius: 8px;
+          border-right: 3px solid #4a90e2;
+        }
+        
+        .notes-title {
+          font-weight: bold;
+          margin-bottom: 5px;
+          color: #4a90e2;
+        }
+        
+        .reference-info {
+          padding: 8px;
+          margin-bottom: 10px;
+          background-color: #e6f2ff;
+          border-radius: 4px;
+          border-right: 3px solid #4a90e2;
+          font-size: 0.9em;
+        }
+        
+        .notes-content {
+          padding: 10px;
+          background-color: #fff;
+          border-radius: 4px;
+          border: 1px solid #ddd;
+          line-height: 1.6;
+        }
+        
+        /* Styles for mixed direction text */
+        .ltr-text {
+          direction: ltr;
+          text-align: left;
+          display: inline-block;
+          margin: 2px 0;
+        }
+        
+        .rtl-text {
+          direction: rtl;
+          text-align: right;
+          display: inline-block;
+          margin: 2px 0;
+        }
+        
+        .mixed-content {
+          white-space: pre-wrap;
+        }
+        
+        .print-controls {
+          text-align: center;
+          margin: 20px 0;
+        }
+        
+        .print-btn {
+          display: inline-block;
+          margin: 0 10px;
+          padding: 10px 20px;
+          background-color: #4a90e2;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 16px;
+          text-decoration: none;
+        }
+        
+        .print-btn:hover {
+          background-color: #3f7fd1;
+        }
+        
+        @media print {
+          .no-print {
+            display: none !important;
+          }
+          
+          body {
+            font-size: 12pt;
+            background-color: white;
+          }
+          
+          .question-container {
+            page-break-inside: avoid;
+            box-shadow: none;
+            border: 1px solid #ddd;
+          }
+          
+          .summary-title {
+            font-size: 24pt;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="summary-title">סיכום בחינה 06-2020</div>
+      
+      <div class="print-controls no-print">
+        <button class="print-btn" onclick="window.print()">הדפס סיכום</button>
+        <button class="print-btn" onclick="window.close()">סגור</button>
+      </div>
+      
+      <div id="summary-container"></div>
+      
+      <div class="print-controls no-print">
+        <button class="print-btn" onclick="window.print()">הדפס סיכום</button>
+        <button class="print-btn" onclick="window.close()">סגור</button>
+      </div>
+      
+      <script>
+        // Function to detect if text is primarily English
+        function isEnglishText(text) {
+          const englishPattern = /[a-zA-Z]/g;
+          const hebrewPattern = /[\u0590-\u05FF]/g;
+          
+          const englishMatches = text.match(englishPattern) || [];
+          const hebrewMatches = text.match(hebrewPattern) || [];
+          
+          return englishMatches.length > hebrewMatches.length;
+        }
+        
+        // Function to process mixed direction text
+        function processMixedText(text) {
+          if (!text) return '';
+          
+          // Split text by lines first
+          const lines = text.split('\\n');
+          const processedLines = lines.map(line => {
+            if (!line.trim()) return '<br>';
+            
+            // Check if the entire line is primarily English
+            if (isEnglishText(line)) {
+              return '<div class="ltr-text">' + escapeHtml(line) + '</div>';
+            } else {
+              // For mixed content within a line, we'll process word by word
+              const words = line.split(' ');
+              let processedLine = '';
+              let currentSpan = '';
+              let currentDirection = null;
+              
+              words.forEach((word, index) => {
+                const isWordEnglish = isEnglishText(word);
+                
+                if (currentDirection === null) {
+                  currentDirection = isWordEnglish ? 'ltr' : 'rtl';
+                  currentSpan = word;
+                } else if ((currentDirection === 'ltr' && isWordEnglish) || 
+                          (currentDirection === 'rtl' && !isWordEnglish)) {
+                  currentSpan += ' ' + word;
+                } else {
+                  // Direction change - close current span and start new one
+                  processedLine += '<span class="' + currentDirection + '-text">' + escapeHtml(currentSpan) + '</span> ';
+                  currentDirection = isWordEnglish ? 'ltr' : 'rtl';
+                  currentSpan = word;
+                }
+                
+                // If this is the last word, close the span
+                if (index === words.length - 1) {
+                  processedLine += '<span class="' + currentDirection + '-text">' + escapeHtml(currentSpan) + '</span>';
+                }
+              });
+              
+              return '<div class="rtl-text">' + processedLine + '</div>';
+            }
+          });
+          
+          return processedLines.join('');
+        }
+        
+        // Function to escape HTML characters
+        function escapeHtml(text) {
+          const div = document.createElement('div');
+          div.textContent = text;
+          return div.innerHTML;
+        }
+        
+        // Function to apply mixed text processing to elements
+        function applyMixedTextProcessing() {
+          const notesContents = document.querySelectorAll('.notes-content');
+          notesContents.forEach(element => {
+            if (element.dataset.originalText) {
+              element.innerHTML = processMixedText(element.dataset.originalText);
+              element.classList.add('mixed-content');
+            }
+          });
+        }
+        
+        // Apply processing when page loads
+        window.onload = function() {
+          applyMixedTextProcessing();
+        };
+      ` + `</script>
+    </body>
+    </html>
+  `);
+  
+  // Add all questions to the container
+  const summaryContainer = summaryWindow.document.getElementById('summary-container');
+  
+  questions.forEach(question => {
+    const selectedAnswer = selectedAnswers[question.id];
+    const isCorrect = selectedAnswer === question.correctAnswer;
+    const wasAnswered = selectedAnswer !== undefined;
+    
+    // Determine result indicator
+    let resultIndicator = '';
+    let resultClass = '';
+    if (!wasAnswered) {
+      resultIndicator = '-';
+      resultClass = 'unanswered';
+    } else if (isCorrect) {
+      resultIndicator = '✓';
+      resultClass = 'correct';
+    } else {
+      resultIndicator = '✗';
+      resultClass = 'incorrect';
+    }
+    
+    // Create question container
+    const questionDiv = summaryWindow.document.createElement('div');
+    questionDiv.className = 'question-container';
+    
+    // Question header
+    const headerDiv = summaryWindow.document.createElement('div');
+    headerDiv.className = 'question-header';
+    headerDiv.innerHTML = `
+      <div class="question-number">שאלה ${question.id}</div>
+      <div class="result-indicator ${resultClass}">${resultIndicator}</div>
+    `;
+    questionDiv.appendChild(headerDiv);
+    
+    // Question text
+    const textDiv = summaryWindow.document.createElement('div');
+    textDiv.className = 'question-text';
+    textDiv.textContent = question.text;
+    questionDiv.appendChild(textDiv);
+    
+    // Images
+    if (question.image) {
+      const imageContainer = summaryWindow.document.createElement('div');
+      imageContainer.className = 'image-container';
+      imageContainer.innerHTML = `<img src="/06-2020/images/${question.image}" alt="תמונה לשאלה ${question.id}">`;
+      questionDiv.appendChild(imageContainer);
+    } else if (question.multipleImages) {
+      const multipleImagesContainer = summaryWindow.document.createElement('div');
+      multipleImagesContainer.className = 'multiple-images-container';
+      
+      for (let i = 0; i < question.images.length; i++) {
+        const imageDiv = summaryWindow.document.createElement('div');
+        imageDiv.className = 'image-container';
+        imageDiv.innerHTML = `
+          <div class="image-label">${question.imageLabels[i]}</div>
+          <img src="/06-2020/images/${question.images[i]}" alt="תמונה ${i+1} לשאלה ${question.id}">
+        `;
+        multipleImagesContainer.appendChild(imageDiv);
+      }
+      questionDiv.appendChild(multipleImagesContainer);
+    }
+    
+    // Options
+    const optionsDiv = summaryWindow.document.createElement('div');
+    optionsDiv.className = 'options';
+    
+    Object.entries(question.options).forEach(([key, value]) => {
+      const optionDiv = summaryWindow.document.createElement('div');
+      optionDiv.className = 'option';
+      
+      // Determine option styling
+      if (key === question.correctAnswer) {
+        optionDiv.classList.add('correct');
+      } else if (key === selectedAnswer && selectedAnswer !== question.correctAnswer) {
+        optionDiv.classList.add('incorrect');
+      }
+      
+      optionDiv.innerHTML = `
+        <div class="option-label">${key}</div>
+        <div class="option-text">${value}</div>
+      `;
+      
+      optionsDiv.appendChild(optionDiv);
+    });
+    
+    questionDiv.appendChild(optionsDiv);
+    
+    // Notes section (if there are notes or references)
+    const hasNotes = questionNotes[question.id] && questionNotes[question.id].trim();
+    const hasReference = questionReferences[question.id];
+    
+    if (hasNotes || hasReference) {
+      const notesSection = summaryWindow.document.createElement('div');
+      notesSection.className = 'notes-section';
+      
+      const notesTitle = summaryWindow.document.createElement('div');
+      notesTitle.className = 'notes-title';
+      notesTitle.textContent = 'הערות:';
+      notesSection.appendChild(notesTitle);
+      
+      // Add reference if available
+      if (hasReference) {
+        const referenceDiv = summaryWindow.document.createElement('div');
+        referenceDiv.className = 'reference-info';
+        referenceDiv.textContent = questionReferences[question.id];
+        notesSection.appendChild(referenceDiv);
+      }
+      
+      // Add user notes if available with mixed text processing
+      if (hasNotes) {
+        const notesContent = summaryWindow.document.createElement('div');
+        notesContent.className = 'notes-content';
+        // Store original text for processing
+        notesContent.dataset.originalText = questionNotes[question.id];
+        notesSection.appendChild(notesContent);
+      }
+      
+      questionDiv.appendChild(notesSection);
+    }
+    
+    summaryContainer.appendChild(questionDiv);
+  });
+  
+  // Focus the new window
+  summaryWindow.focus();
+}
+
+// Add comprehensive summary button to results page
+function addComprehensiveSummaryButton() {
+  const resultsContainer = document.getElementById('results-container');
+  if (!resultsContainer) return;
+  
+  // Check if button already exists
+  if (document.getElementById('comprehensive-summary-btn')) return;
+  
+  const comprehensiveSummaryBtn = document.createElement('button');
+  comprehensiveSummaryBtn.id = 'comprehensive-summary-btn';
+  comprehensiveSummaryBtn.className = 'return-to-exam no-print';
+  comprehensiveSummaryBtn.textContent = 'סיכום מפורט להדפסה';
+  comprehensiveSummaryBtn.style.backgroundColor = '#ff9800';
+  comprehensiveSummaryBtn.style.display = 'block';
+  comprehensiveSummaryBtn.style.margin = '20px auto';
+  comprehensiveSummaryBtn.onclick = createComprehensiveSummary;
+  
+  // Get the return button to insert before it
+  const returnBtn = document.getElementById('return-btn');
+  
+  if (returnBtn) {
+    // Add it before the return button
+    resultsContainer.insertBefore(comprehensiveSummaryBtn, returnBtn);
+  } else {
+    // Just append it if the return button isn't found
+    resultsContainer.appendChild(comprehensiveSummaryBtn);
+  }
+}
+
+// Override the existing showResults function to add the comprehensive summary button
+const originalShowResultsForSummary = showResults;
+showResults = function() {
+  // Call the original function
+  originalShowResultsForSummary();
+  
+  // Add comprehensive summary button to results
+  setTimeout(addComprehensiveSummaryButton, 100);
+};
   </script>
 </body>
 </html>
