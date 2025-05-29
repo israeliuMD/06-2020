@@ -3730,6 +3730,10 @@ function createComprehensiveSummary() {
   // Create a new window for the comprehensive summary
   const summaryWindow = window.open('', '_blank');
   
+  // Get the current page URL to construct proper image paths
+  const currentPath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
+  const imageBasePath = window.location.origin + currentPath + '/images/';
+  
   // Write the HTML content for the comprehensive summary page
   summaryWindow.document.write(`
     <!DOCTYPE html>
@@ -3883,7 +3887,6 @@ function createComprehensiveSummary() {
           line-height: 1.6;
         }
         
-        /* Styles for mixed direction text */
         .ltr-text {
           direction: ltr;
           text-align: left;
@@ -3962,10 +3965,9 @@ function createComprehensiveSummary() {
       </div>
       
       <script>
-        // Function to detect if text is primarily English
         function isEnglishText(text) {
           const englishPattern = /[a-zA-Z]/g;
-          const hebrewPattern = /[\u0590-\u05FF]/g;
+          const hebrewPattern = /[\\u0590-\\u05FF]/g;
           
           const englishMatches = text.match(englishPattern) || [];
           const hebrewMatches = text.match(hebrewPattern) || [];
@@ -3973,20 +3975,16 @@ function createComprehensiveSummary() {
           return englishMatches.length > hebrewMatches.length;
         }
         
-        // Function to process mixed direction text
         function processMixedText(text) {
           if (!text) return '';
           
-          // Split text by lines first
           const lines = text.split('\\n');
           const processedLines = lines.map(line => {
             if (!line.trim()) return '<br>';
             
-            // Check if the entire line is primarily English
             if (isEnglishText(line)) {
               return '<div class="ltr-text">' + escapeHtml(line) + '</div>';
             } else {
-              // For mixed content within a line, we'll process word by word
               const words = line.split(' ');
               let processedLine = '';
               let currentSpan = '';
@@ -4002,13 +4000,11 @@ function createComprehensiveSummary() {
                           (currentDirection === 'rtl' && !isWordEnglish)) {
                   currentSpan += ' ' + word;
                 } else {
-                  // Direction change - close current span and start new one
                   processedLine += '<span class="' + currentDirection + '-text">' + escapeHtml(currentSpan) + '</span> ';
                   currentDirection = isWordEnglish ? 'ltr' : 'rtl';
                   currentSpan = word;
                 }
                 
-                // If this is the last word, close the span
                 if (index === words.length - 1) {
                   processedLine += '<span class="' + currentDirection + '-text">' + escapeHtml(currentSpan) + '</span>';
                 }
@@ -4021,14 +4017,12 @@ function createComprehensiveSummary() {
           return processedLines.join('');
         }
         
-        // Function to escape HTML characters
         function escapeHtml(text) {
           const div = document.createElement('div');
           div.textContent = text;
           return div.innerHTML;
         }
         
-        // Function to apply mixed text processing to elements
         function applyMixedTextProcessing() {
           const notesContents = document.querySelectorAll('.notes-content');
           notesContents.forEach(element => {
@@ -4039,11 +4033,10 @@ function createComprehensiveSummary() {
           });
         }
         
-        // Apply processing when page loads
         window.onload = function() {
           applyMixedTextProcessing();
         };
-      ` + `</script>
+      </script>
     </body>
     </html>
   `);
@@ -4077,10 +4070,7 @@ function createComprehensiveSummary() {
     // Question header
     const headerDiv = summaryWindow.document.createElement('div');
     headerDiv.className = 'question-header';
-    headerDiv.innerHTML = `
-      <div class="question-number">שאלה ${question.id}</div>
-      <div class="result-indicator ${resultClass}">${resultIndicator}</div>
-    `;
+    headerDiv.innerHTML = '<div class="question-number">שאלה ' + question.id + '</div><div class="result-indicator ' + resultClass + '">' + resultIndicator + '</div>';
     questionDiv.appendChild(headerDiv);
     
     // Question text
@@ -4093,7 +4083,7 @@ function createComprehensiveSummary() {
     if (question.image) {
       const imageContainer = summaryWindow.document.createElement('div');
       imageContainer.className = 'image-container';
-      imageContainer.innerHTML = `<img src="/06-2020/images/${question.image}" alt="תמונה לשאלה ${question.id}">`;
+      imageContainer.innerHTML = '<img src="' + imageBasePath + question.image + '" alt="תמונה לשאלה ' + question.id + '">';
       questionDiv.appendChild(imageContainer);
     } else if (question.multipleImages) {
       const multipleImagesContainer = summaryWindow.document.createElement('div');
@@ -4102,10 +4092,7 @@ function createComprehensiveSummary() {
       for (let i = 0; i < question.images.length; i++) {
         const imageDiv = summaryWindow.document.createElement('div');
         imageDiv.className = 'image-container';
-        imageDiv.innerHTML = `
-          <div class="image-label">${question.imageLabels[i]}</div>
-          <img src="/06-2020/images/${question.images[i]}" alt="תמונה ${i+1} לשאלה ${question.id}">
-        `;
+        imageDiv.innerHTML = '<div class="image-label">' + question.imageLabels[i] + '</div><img src="' + imageBasePath + question.images[i] + '" alt="תמונה ' + (i+1) + ' לשאלה ' + question.id + '">';
         multipleImagesContainer.appendChild(imageDiv);
       }
       questionDiv.appendChild(multipleImagesContainer);
@@ -4126,11 +4113,7 @@ function createComprehensiveSummary() {
         optionDiv.classList.add('incorrect');
       }
       
-      optionDiv.innerHTML = `
-        <div class="option-label">${key}</div>
-        <div class="option-text">${value}</div>
-      `;
-      
+      optionDiv.innerHTML = '<div class="option-label">' + key + '</div><div class="option-text">' + value + '</div>';
       optionsDiv.appendChild(optionDiv);
     });
     
