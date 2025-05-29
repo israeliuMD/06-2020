@@ -3737,28 +3737,23 @@ function createComprehensiveSummary() {
   // Write the HTML content for the comprehensive summary page
   summaryWindow.document.write(`
     <!DOCTYPE html>
-    <html lang="he" dir="rtl">
+    <html dir="rtl">
     <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>סיכום בחינה 06-2020</title>
+      <meta charset="UTF-8">
       <style>
         body {
           font-family: Arial, sans-serif;
-          margin: 0;
           padding: 20px;
-          background-color: #f5f5f5;
           direction: rtl;
+          background-color: #f5f5f5;
         }
-        
         .summary-title {
           text-align: center;
-          font-size: 28px;
-          font-weight: bold;
+          font-size: 24px;
           margin-bottom: 30px;
-          color: #333;
+          font-weight: bold;
         }
-        
         .question-container {
           background-color: white;
           border-radius: 8px;
@@ -3767,48 +3762,39 @@ function createComprehensiveSummary() {
           margin-bottom: 20px;
           break-inside: avoid;
         }
-        
         .question-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
           margin-bottom: 15px;
         }
-        
         .question-number {
           font-weight: bold;
           font-size: 1.2em;
         }
-        
         .result-indicator {
           font-size: 1.5em;
           font-weight: bold;
         }
-        
         .result-indicator.correct {
           color: #4caf50;
         }
-        
         .result-indicator.incorrect {
           color: #f44336;
         }
-        
         .result-indicator.unanswered {
           color: #999;
         }
-        
         .image-container {
           text-align: center;
           margin: 15px 0;
         }
-        
         .image-container img {
           max-width: 100%;
-          max-height: 400px;
+          max-height: auto;
           border: 1px solid #ddd;
           border-radius: 4px;
         }
-        
         .multiple-images-container {
           display: flex;
           justify-content: center;
@@ -3816,20 +3802,17 @@ function createComprehensiveSummary() {
           gap: 15px;
           margin: 15px 0;
         }
-        
         .image-label {
           text-align: center;
           font-weight: bold;
           margin-bottom: 5px;
         }
-        
         .options {
           display: flex;
           flex-direction: column;
           gap: 10px;
           margin-bottom: 15px;
         }
-        
         .option {
           padding: 10px;
           border: 1px solid #ddd;
@@ -3837,25 +3820,21 @@ function createComprehensiveSummary() {
           display: flex;
           align-items: flex-start;
         }
-        
         .option.correct {
           border-color: #4caf50;
           background-color: #e8f5e9;
           font-weight: bold;
         }
-        
         .option.incorrect {
           border-color: #f44336;
           background-color: #ffebee;
           font-weight: bold;
         }
-        
         .option-label {
           font-weight: bold;
           margin-left: 10px;
           min-width: 20px;
         }
-        
         .notes-section {
           margin-top: 15px;
           padding: 10px;
@@ -3863,13 +3842,11 @@ function createComprehensiveSummary() {
           border-radius: 8px;
           border-right: 3px solid #4a90e2;
         }
-        
         .notes-title {
           font-weight: bold;
           margin-bottom: 5px;
           color: #4a90e2;
         }
-        
         .reference-info {
           padding: 8px;
           margin-bottom: 10px;
@@ -3878,41 +3855,25 @@ function createComprehensiveSummary() {
           border-right: 3px solid #4a90e2;
           font-size: 0.9em;
         }
-        
         .notes-content {
           padding: 10px;
           background-color: #fff;
           border-radius: 4px;
           border: 1px solid #ddd;
+          white-space: pre-wrap;
           line-height: 1.6;
         }
-        
         .ltr-text {
           direction: ltr;
           text-align: left;
-          display: inline-block;
-          margin: 2px 0;
         }
-        
-        .rtl-text {
-          direction: rtl;
-          text-align: right;
-          display: inline-block;
-          margin: 2px 0;
-        }
-        
-        .mixed-content {
-          white-space: pre-wrap;
-        }
-        
         .print-controls {
           text-align: center;
           margin: 20px 0;
         }
-        
         .print-btn {
-          display: inline-block;
-          margin: 0 10px;
+          display: block;
+          margin: 20px auto;
           padding: 10px 20px;
           background-color: #4a90e2;
           color: white;
@@ -3920,131 +3881,38 @@ function createComprehensiveSummary() {
           border-radius: 4px;
           cursor: pointer;
           font-size: 16px;
-          text-decoration: none;
         }
-        
-        .print-btn:hover {
-          background-color: #3f7fd1;
-        }
-        
         @media print {
           .no-print {
-            display: none !important;
+            display: none;
           }
-          
           body {
             font-size: 12pt;
-            background-color: white;
           }
-          
           .question-container {
             page-break-inside: avoid;
-            box-shadow: none;
-            border: 1px solid #ddd;
-          }
-          
-          .summary-title {
-            font-size: 24pt;
           }
         }
       </style>
     </head>
     <body>
       <div class="summary-title">סיכום בחינה 06-2020</div>
-      
-      <div class="print-controls no-print">
-        <button class="print-btn" onclick="window.print()">הדפס סיכום</button>
-        <button class="print-btn" onclick="window.close()">סגור</button>
-      </div>
-      
+      <button class="print-btn no-print" onclick="window.print()">הדפס סיכום</button>
       <div id="summary-container"></div>
-      
-      <div class="print-controls no-print">
-        <button class="print-btn" onclick="window.print()">הדפס סיכום</button>
-        <button class="print-btn" onclick="window.close()">סגור</button>
-      </div>
-      
-      <script>
-        function isEnglishText(text) {
-          const englishPattern = /[a-zA-Z]/g;
-          const hebrewPattern = /[\\u0590-\\u05FF]/g;
-          
-          const englishMatches = text.match(englishPattern) || [];
-          const hebrewMatches = text.match(hebrewPattern) || [];
-          
-          return englishMatches.length > hebrewMatches.length;
-        }
-        
-        function processMixedText(text) {
-          if (!text) return '';
-          
-          const lines = text.split('\\n');
-          const processedLines = lines.map(line => {
-            if (!line.trim()) return '<br>';
-            
-            if (isEnglishText(line)) {
-              return '<div class="ltr-text">' + escapeHtml(line) + '</div>';
-            } else {
-              const words = line.split(' ');
-              let processedLine = '';
-              let currentSpan = '';
-              let currentDirection = null;
-              
-              words.forEach((word, index) => {
-                const isWordEnglish = isEnglishText(word);
-                
-                if (currentDirection === null) {
-                  currentDirection = isWordEnglish ? 'ltr' : 'rtl';
-                  currentSpan = word;
-                } else if ((currentDirection === 'ltr' && isWordEnglish) || 
-                          (currentDirection === 'rtl' && !isWordEnglish)) {
-                  currentSpan += ' ' + word;
-                } else {
-                  processedLine += '<span class="' + currentDirection + '-text">' + escapeHtml(currentSpan) + '</span> ';
-                  currentDirection = isWordEnglish ? 'ltr' : 'rtl';
-                  currentSpan = word;
-                }
-                
-                if (index === words.length - 1) {
-                  processedLine += '<span class="' + currentDirection + '-text">' + escapeHtml(currentSpan) + '</span>';
-                }
-              });
-              
-              return '<div class="rtl-text">' + processedLine + '</div>';
-            }
-          });
-          
-          return processedLines.join('');
-        }
-        
-        function escapeHtml(text) {
-          const div = document.createElement('div');
-          div.textContent = text;
-          return div.innerHTML;
-        }
-        
-        function applyMixedTextProcessing() {
-          const notesContents = document.querySelectorAll('.notes-content');
-          notesContents.forEach(element => {
-            if (element.dataset.originalText) {
-              element.innerHTML = processMixedText(element.dataset.originalText);
-              element.classList.add('mixed-content');
-            }
-          });
-        }
-        
-        window.onload = function() {
-          applyMixedTextProcessing();
-        };
-      </script>
+      <button class="print-btn no-print" onclick="window.print()">הדפס סיכום</button>
     </body>
     </html>
   `);
   
   // Add all questions to the container
   const summaryContainer = summaryWindow.document.getElementById('summary-container');
+  let hasContent = false;
   
-  questions.forEach(question => {
+  // Sort question IDs numerically
+  const sortedQuestions = questions.sort((a, b) => a.id - b.id);
+  
+  for (const question of sortedQuestions) {
+    hasContent = true;
     const selectedAnswer = selectedAnswers[question.id];
     const isCorrect = selectedAnswer === question.correctAnswer;
     const wasAnswered = selectedAnswer !== undefined;
@@ -4063,39 +3931,61 @@ function createComprehensiveSummary() {
       resultClass = 'incorrect';
     }
     
-    // Create question container
-    const questionDiv = summaryWindow.document.createElement('div');
-    questionDiv.className = 'question-container';
+    const questionContainer = summaryWindow.document.createElement('div');
+    questionContainer.className = 'question-container';
     
-    // Question header
-    const headerDiv = summaryWindow.document.createElement('div');
-    headerDiv.className = 'question-header';
-    headerDiv.innerHTML = '<div class="question-number">שאלה ' + question.id + '</div><div class="result-indicator ' + resultClass + '">' + resultIndicator + '</div>';
-    questionDiv.appendChild(headerDiv);
+    // Question header with number and result indicator
+    const questionHeader = summaryWindow.document.createElement('div');
+    questionHeader.className = 'question-header';
+    
+    const questionNumber = summaryWindow.document.createElement('div');
+    questionNumber.className = 'question-number';
+    questionNumber.textContent = `שאלה ${question.id}`;
+    
+    const resultIndicatorDiv = summaryWindow.document.createElement('div');
+    resultIndicatorDiv.className = `result-indicator ${resultClass}`;
+    resultIndicatorDiv.textContent = resultIndicator;
+    
+    questionHeader.appendChild(questionNumber);
+    questionHeader.appendChild(resultIndicatorDiv);
+    questionContainer.appendChild(questionHeader);
     
     // Question text
-    const textDiv = summaryWindow.document.createElement('div');
-    textDiv.className = 'question-text';
-    textDiv.textContent = question.text;
-    questionDiv.appendChild(textDiv);
+    const questionText = summaryWindow.document.createElement('div');
+    questionText.className = 'question-text';
+    questionText.textContent = question.text;
+    questionContainer.appendChild(questionText);
     
     // Images
     if (question.image) {
       const imageContainer = summaryWindow.document.createElement('div');
       imageContainer.className = 'image-container';
-      imageContainer.innerHTML = '<img src="' + imageBasePath + question.image + '" alt="תמונה לשאלה ' + question.id + '">';
-      questionDiv.appendChild(imageContainer);
+      const img = summaryWindow.document.createElement('img');
+      img.src = imageBasePath + question.image;
+      img.alt = `תמונה לשאלה ${question.id}`;
+      imageContainer.appendChild(img);
+      questionContainer.appendChild(imageContainer);
     } else if (question.multipleImages) {
       const multipleImagesContainer = summaryWindow.document.createElement('div');
       multipleImagesContainer.className = 'multiple-images-container';
       
       for (let i = 0; i < question.images.length; i++) {
-        const imageDiv = summaryWindow.document.createElement('div');
-        imageDiv.className = 'image-container';
-        imageDiv.innerHTML = '<div class="image-label">' + question.imageLabels[i] + '</div><img src="' + imageBasePath + question.images[i] + '" alt="תמונה ' + (i+1) + ' לשאלה ' + question.id + '">';
-        multipleImagesContainer.appendChild(imageDiv);
+        const imageContainer = summaryWindow.document.createElement('div');
+        imageContainer.className = 'image-container';
+        
+        const imageLabel = summaryWindow.document.createElement('div');
+        imageLabel.className = 'image-label';
+        imageLabel.textContent = question.imageLabels[i];
+        
+        const img = summaryWindow.document.createElement('img');
+        img.src = imageBasePath + question.images[i];
+        img.alt = `תמונה ${i+1} לשאלה ${question.id}`;
+        
+        imageContainer.appendChild(imageLabel);
+        imageContainer.appendChild(img);
+        multipleImagesContainer.appendChild(imageContainer);
       }
-      questionDiv.appendChild(multipleImagesContainer);
+      questionContainer.appendChild(multipleImagesContainer);
     }
     
     // Options
@@ -4113,11 +4003,20 @@ function createComprehensiveSummary() {
         optionDiv.classList.add('incorrect');
       }
       
-      optionDiv.innerHTML = '<div class="option-label">' + key + '</div><div class="option-text">' + value + '</div>';
+      const optionLabel = summaryWindow.document.createElement('div');
+      optionLabel.className = 'option-label';
+      optionLabel.textContent = key;
+      
+      const optionText = summaryWindow.document.createElement('div');
+      optionText.className = 'option-text';
+      optionText.textContent = value;
+      
+      optionDiv.appendChild(optionLabel);
+      optionDiv.appendChild(optionText);
       optionsDiv.appendChild(optionDiv);
     });
     
-    questionDiv.appendChild(optionsDiv);
+    questionContainer.appendChild(optionsDiv);
     
     // Notes section (if there are notes or references)
     const hasNotes = questionNotes[question.id] && questionNotes[question.id].trim();
@@ -4140,20 +4039,40 @@ function createComprehensiveSummary() {
         notesSection.appendChild(referenceDiv);
       }
       
-      // Add user notes if available with mixed text processing
+      // Add user notes if available
       if (hasNotes) {
         const notesContent = summaryWindow.document.createElement('div');
         notesContent.className = 'notes-content';
-        // Store original text for processing
-        notesContent.dataset.originalText = questionNotes[question.id];
+        
+        // Simple approach for mixed text - detect if predominantly English
+        const text = questionNotes[question.id];
+        const englishChars = (text.match(/[a-zA-Z]/g) || []).length;
+        const hebrewChars = (text.match(/[\u0590-\u05FF]/g) || []).length;
+        
+        if (englishChars > hebrewChars) {
+          notesContent.classList.add('ltr-text');
+        }
+        
+        notesContent.textContent = text;
         notesSection.appendChild(notesContent);
       }
       
-      questionDiv.appendChild(notesSection);
+      questionContainer.appendChild(notesSection);
     }
     
-    summaryContainer.appendChild(questionDiv);
-  });
+    summaryContainer.appendChild(questionContainer);
+  }
+  
+  // If no content, show a message
+  if (!hasContent) {
+    const noContentMessage = summaryWindow.document.createElement('div');
+    noContentMessage.style.textAlign = 'center';
+    noContentMessage.style.margin = '50px 0';
+    noContentMessage.style.fontSize = '18px';
+    noContentMessage.style.color = '#666';
+    noContentMessage.textContent = 'אין תוכן להצגה';
+    summaryContainer.appendChild(noContentMessage);
+  }
   
   // Focus the new window
   summaryWindow.focus();
