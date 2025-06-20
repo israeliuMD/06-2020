@@ -4085,6 +4085,28 @@ function createComprehensiveSummary() {
   
   // Focus the new window
   summaryWindow.focus();
+	// Add the Word export functionality to the summary window
+summaryWindow.openWordExport = function() {
+  // Prepare exam data for export
+  const examData = {
+    questions: questions,
+    selectedAnswers: selectedAnswers,
+    questionNotes: questionNotes,
+    questionReferences: questionReferences,
+    examTitle: "סיכום בחינה 06-2020"
+  };
+  
+  // Open the word export utility window
+  const exportWindow = window.open('word-export.html', '_blank', 'width=800,height=600');
+  
+  // Wait for the export window to load, then send data
+  exportWindow.addEventListener('load', function() {
+    exportWindow.postMessage({
+      type: 'EXPORT_EXAM_DATA',
+      examData: examData
+    }, '*');
+  });
+};
 }
 
 // Add comprehensive summary button to results page
